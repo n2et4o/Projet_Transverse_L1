@@ -6,7 +6,7 @@ pg.init()
 # Fenêtre du jeu
 pg.display.set_caption("storm Grief")
 screen = pg.display.set_mode((1080, 720))
-background = pg.image.load("Image_du_jeu/Background.png")
+background = pg.image.load("Image_du_jeu/new_background.png")
 
 # Chargement du jeu
 game = Game()
@@ -21,20 +21,43 @@ while running:
         # Pression sur une touche
         elif event.type == pg.KEYDOWN:
             game.pressed[event.key] = True
+
+            # Pression sur la touche d'attaque
+            if event.key == pg.K_a:
+                game.hero.Attack()
+
         elif event.type == pg.KEYUP:
             game.pressed[event.key] = False
 
+
+
     # Vérification que la touche est pressée et que le hero ne sorte pas du cadre de l'écran
-    if game.pressed.get(pg.K_RIGHT) and game.hero.rect.x + game.hero.rect.width < screen.get_width() +130:
+    if game.pressed.get(pg.K_RIGHT) and game.hero.rect.x + game.hero.rect.width < screen.get_width() :
         game.hero.move_right()
-    elif game.pressed.get(pg.K_LEFT) and game.hero.rect.x > -50:
+    elif game.pressed.get(pg.K_LEFT) and game.hero.rect.x > 0:
         game.hero.move_left()
+
+    elif game.pressed.get(pg.K_UP) and game.hero.rect.y > 0:
+        game.hero.move_up()
+    elif game.pressed.get(pg.K_DOWN) and game.hero.rect.y < screen.get_height() - 200:
+        game.hero.move_down()
 
     # Affichage de l'arrière-plan
     screen.blit(background, (0, 0))
 
     # Affichage du héros
     screen.blit(game.hero.image, game.hero.rect)
+
+    # Affichage de l'attaque
+    game.hero.all_attack.draw(screen)
+
+    # Boucle d'affichage du projectile
+    for i in game.hero.all_attack:
+        i.mouv_attack()
+        #i.health_bar(screen)
+
+    # Mise à jour de la barre de vie
+    game.hero.health_bar(screen)
 
     # Mise à jour de l'affichage
     pg.display.flip()
