@@ -1,5 +1,6 @@
 import pygame as pg
 pg.init()
+import math
 
 # Class du hero
 class Hero(pg.sprite.Sprite):
@@ -10,12 +11,13 @@ class Hero(pg.sprite.Sprite):
         self.pvmax = 100
         self.attack = 10
         self.vitesse_mouve = 5
-        self.image = pg.image.load(r"C:\Users\20220848\PycharmProjects\Projet_Transverse_L1\Image_du_jeu\hero_items\mouv_0.png")
+        self.image = pg.image.load(r"C:\Users\20220848\PycharmProjects\Projet_Transverse_L1\Image_du_jeu\hero_items\run_0.png")
         self.image = pg.transform.scale(self.image,(200,200))
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 500
         self.all_attack = pg.sprite.Group()
+        self.animation = Animation("hero")
 
     def move_right(self):
         #verification de s'il y'a collision
@@ -29,6 +31,9 @@ class Hero(pg.sprite.Sprite):
         self.rect.y += self.vitesse_mouve
     def Attack(self):
         self.all_attack.add(Attack_hero(self))
+    def update_animation(self):
+        self.animation.animate()
+        self.image = self.animation.image
     def health_bar(self, surface):
         # Couleur de la barre utilisant le code RGB (R,G,B)
         bar_color = (172, 255, 51)
@@ -57,7 +62,7 @@ class Attack_hero(pg.sprite.Sprite):
         self.hero.all_attack.remove(self)
     def mouv_attack(self):
         self.rect.x += self.vitesse_attack
-
+        #self.rect.y =((0.5*self.rect.x) /(self.vitesse_attack * math.cos(45))) + (self.vitesse_attack * self.rect.x * math.tan(45)) + self.rect.y
         # Verification et suppression de l'attque si celui-ci est en dehors de l'ecran
         if self.rect.x > 1080:
             self.remouve
@@ -65,8 +70,29 @@ class Attack_hero(pg.sprite.Sprite):
 class Animation(pg.sprite.Sprite):
     def __init__(self,sprite_name):
         super().__init__()
-        self.image = pg.image.load(f'Image_du_jeu/ {sprite_name}.png')
+        self.image = pg.image.load(f'Image_du_jeu/{sprite_name}_items/run_0.png')
+        self.image_current = 0
+        self.images = dict_animation.get("hero")
+    def animate(self):
+
+        # Passer à l'image suivante
+        self.image_current += 1
+        # Vérification de la fin de l'animation
+        if self.image_current >= len(self.images) :
+            # Revenir à l'image de départ
+            self.image_current = 0
+        self.image = self.images[self.image_current]
 def load_animate_image(sprite_name):
     # Charger les images
     images = []
+    path = f"Image_du_jeu/{sprite_name}_items/run_"
+    for num in range(0,6):
+        images_path = path + str(num) + ".png"
+        images.append(pg.image.load(images_path))
+
+    return images
+
+dict_animation = {
+    "hero" : load_animate_image("hero")
+}
 
