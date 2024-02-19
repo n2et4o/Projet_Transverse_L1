@@ -1,6 +1,20 @@
 import pygame as pg
 pg.init()
-import math
+import os
+
+# Adaptation du chemin d'accès à n'importe quel appareil
+def trouver_image(nom_image):
+    # Récupérer le répertoire racine du projet
+    repertoire_racine = os.getcwd()
+    # Parcourir récursivement le système de fichiers à partir du répertoire racine
+    for dossier_racine, sous_repertoires, fichiers in os.walk(repertoire_racine):
+        # Vérifier si l'image recherchée se trouve dans les fichiers du dossier courant
+        if nom_image in fichiers:
+            chemin_image = os.path.join(dossier_racine, nom_image)
+            return chemin_image
+    # Si l'image n'est pas trouvée, retourner None
+    return None
+
 
 # Class du hero
 class Hero(pg.sprite.Sprite):
@@ -11,11 +25,12 @@ class Hero(pg.sprite.Sprite):
         self.pvmax = 100
         self.attack = 10
         self.vitesse_mouve = 5
-        self.image = pg.image.load(r"C:\Users\20220848\PycharmProjects\Projet_Transverse_L1\Image_du_jeu\hero_items\run_0.png")
-        self.image = pg.transform.scale(self.image,(200,200))
+        run0 = trouver_image("run_0.png")
+        self.image = pg.image.load(run0)
+        self.image = pg.transform.scale(self.image,(150,150))
         self.rect = self.image.get_rect()
         self.rect.x = 0
-        self.rect.y = 500
+        self.rect.y = 550
         self.all_attack = pg.sprite.Group()
         self.animation = Animation("hero")
 
@@ -27,8 +42,8 @@ class Hero(pg.sprite.Sprite):
         self.rect.x -= self.vitesse_mouve
     def move_up(self):
         self.rect.y -= self.vitesse_mouve
-    def move_down(self):
-        self.rect.y += self.vitesse_mouve
+    #def move_down(self):
+     #   self.rect.y += self.vitesse_mouve
     def Attack(self):
         self.all_attack.add(Attack_hero(self))
     def update_animation(self):
@@ -39,25 +54,34 @@ class Hero(pg.sprite.Sprite):
         bar_color = (172, 255, 51)
         # Position de la barre de vie (x,y,width,height)
         bar_position = [self.rect.x + 30,self.rect.y,self.pv,5]
+        #self.image = pg.image.load(r"C:\Users\20220848\PycharmProjects\Projet_Transverse_L1\Image_du_jeu\keur.png")
+        #self.image = pg.transform.scale(self.image, (50, 50))
         pg.draw.rect(surface,bar_color,bar_position)
         bar_position = [self.rect.x + 30, self.rect.y,self.pvmax, 5]
 class Game :
     def __init__(self):
         self.hero = Hero(self)
         self.pressed = {}
+        #self.ground = Ground()
+        self.gravite = (0,10)
+        self.resistance = (0,0)
+
     def collision(self,sprite,Group):
         return pg.sprite.spritecollide(sprite,Group,False, sprite.collide_mask)
+    def gravite(self):
+        self.hero.rect.y += self.gravite[1] + self.resistance[1]
 
 class Attack_hero(pg.sprite.Sprite):
     def __init__(self,hero):
         super(Attack_hero, self).__init__()
         self.vitesse_attack = 5
         self.hero = hero
-        self.image = pg.image.load(r"C:\Users\20220848\PycharmProjects\Projet_Transverse_L1\Image_du_jeu\PygameAssets-main\projectile.png")
+        projectile = trouver_image("projectile.png")
+        self.image = pg.image.load(projectile)
         self.image = pg.transform.scale(self.image, (50,50))
         self.rect = self.image.get_rect()
-        self.rect.x = hero.rect.x + 150
-        self.rect.y = hero.rect.y + 150
+        self.rect.x = hero.rect.x + 100
+        self.rect.y = hero.rect.y + 100
     def remouve(self):
         self.hero.all_attack.remove(self)
     def mouv_attack(self):
@@ -95,4 +119,10 @@ def load_animate_image(sprite_name):
 dict_animation = {
     "hero" : load_animate_image("hero")
 }
+
+class Ground(pg.sprite.Sprite):    # Classe du Sol
+    def __init__(self):
+        super().__init__()
+        self.rect = pg.rect
+
 

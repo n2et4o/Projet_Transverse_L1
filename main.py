@@ -1,5 +1,6 @@
 import pygame as pg
 from fonctions import *
+
 # Initialisation de Pygame
 pg.init()
 
@@ -37,10 +38,11 @@ while running:
     elif game.pressed.get(pg.K_LEFT) and game.hero.rect.x > 0:
         game.hero.move_left()
 
-    elif game.pressed.get(pg.K_UP) and game.hero.rect.y > 0:
-        game.hero.move_up()
-    elif game.pressed.get(pg.K_DOWN) and game.hero.rect.y < screen.get_height() - 200:
-        game.hero.move_down()
+    #game.gravite()
+    #elif game.pressed.get(pg.K_UP) and game.hero.rect.y > 0:
+    #    game.hero.move_up()
+    #elif game.pressed.get(pg.K_DOWN) and game.hero.rect.y < screen.get_height() - 150:
+     #   game.hero.move_down()
 
     # Affichage de l'arrière-plan
     screen.blit(background, (0, 0))
