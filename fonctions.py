@@ -24,7 +24,7 @@ class Hero(pg.sprite.Sprite):
         self.pv = 100
         self.pvmax = 100
         self.attack = 10
-        self.vitesse_mouve = 11
+        self.vitesse_mouve = 15
         run0 = trouver_image("run_0.png")
         self.image = pg.image.load(run0)
         self.image = pg.transform.scale(self.image,(150,150))

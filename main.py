@@ -29,7 +29,7 @@ while running:
             if event.key == pg.K_a:
                 game.hero.Attack()
             # Pression sur la touche (up) pour effectuer un saut
-            if event.key == pg.K_j and game.hero.rect.y != 0:
+            if event.key == pg.K_UP and game.hero.rect.y != 0:
                 game.hero.jumped = True
                 game.hero.nb_jump += 1
                 if game.hero.rect.y == 0:
