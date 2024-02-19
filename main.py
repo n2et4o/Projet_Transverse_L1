@@ -6,8 +6,10 @@ pg.init()
 
 # Fenêtre du jeu
 pg.display.set_caption("storm Grief")
-screen = pg.display.set_mode((1080, 720))
-background = pg.image.load("Image_du_jeu/new_background.png")
+screen = pg.display.set_mode((1280, 720))
+background_path = trouver_image("new_background.png")
+background = pg.image.load(background_path)
+background = pg.transform.scale(background,(1280,720))
 
 # Chargement du jeu
 game = Game()

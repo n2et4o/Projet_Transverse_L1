@@ -24,7 +24,7 @@ class Hero(pg.sprite.Sprite):
         self.pv = 100
         self.pvmax = 100
         self.attack = 10
-        self.vitesse_mouve = 5
+        self.vitesse_mouve = 11
         run0 = trouver_image("run_0.png")
         self.image = pg.image.load(run0)
         self.image = pg.transform.scale(self.image,(150,150))
@@ -89,7 +89,7 @@ class Game :
         self.ground = Ground()
         self.plac = Ground_up()
         self.collision_ground = False
-        self.rect_limite = pg.Rect(0, 0, 1080, 720)
+        self.rect_limite = pg.Rect(0, 0, 1280, 720)
         self.clock = pg.time.Clock()
         self.fps = 30
 
@@ -162,7 +162,7 @@ dict_animation = {
 class Ground(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.rect = pg.Rect(0,650,1080,170)
+        self.rect = pg.Rect(0,650,1280,170)
     def afficher_sol(self,surface):
         pg.draw.rect(surface,(0,255,0), self.rect)
 
