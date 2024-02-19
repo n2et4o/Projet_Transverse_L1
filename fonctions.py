@@ -30,9 +30,30 @@ class Hero(pg.sprite.Sprite):
         self.image = pg.transform.scale(self.image,(150,150))
         self.rect = self.image.get_rect()
         self.rect.x = 0
-        self.rect.y = 550
+        self.rect.y = 400
         self.all_attack = pg.sprite.Group()
         self.animation = Animation("hero")
+        self.jump = 0
+        self.jump_up = 0
+        self.jump_down = 5
+        self.nb_jump = 0
+        self.jumped = False
+
+
+    def jumpe(self):
+        if self.jumped :
+            if self.jump_up >= 10:
+                self.jump_down -= 10
+                self.jump = self.jump_down
+            else:
+                self.jump_up += 1
+                self.jump = self.jump_up
+
+            if self.jump_down < 0:
+                self.jump_up = 0
+                self.jump_down = 5
+                self.jumped = False
+        self.rect.y = self.rect.y - (10 * (self.jump/2))
 
     def move_right(self):
         #verification de s'il y'a collision
@@ -54,7 +75,8 @@ class Hero(pg.sprite.Sprite):
         bar_color = (172, 255, 51)
         # Position de la barre de vie (x,y,width,height)
         bar_position = [self.rect.x + 30,self.rect.y,self.pv,5]
-        #self.image = pg.image.load(r"C:\Users\20220848\PycharmProjects\Projet_Transverse_L1\Image_du_jeu\keur.png")
+        #heart = trouver_image("keur.png")
+        #self.image = pg.image.load(heart)
         #self.image = pg.transform.scale(self.image, (50, 50))
         pg.draw.rect(surface,bar_color,bar_position)
         bar_position = [self.rect.x + 30, self.rect.y,self.pvmax, 5]
@@ -62,19 +84,35 @@ class Game :
     def __init__(self):
         self.hero = Hero(self)
         self.pressed = {}
-        #self.ground = Ground()
-        self.gravite = (0,10)
-        self.resistance = (0,0)
+        self.gravite = 10
+        self.resistance = 0
+        self.ground = Ground()
+        self.plac = Ground_up()
+        self.collision_ground = False
+        self.rect_limite = pg.Rect(0, 0, 1080, 720)
+        self.clock = pg.time.Clock()
+        self.fps = 30
 
     def collision(self,sprite,Group):
         return pg.sprite.spritecollide(sprite,Group,False, sprite.collide_mask)
-    def gravite(self):
-        self.hero.rect.y += self.gravite[1] + self.resistance[1]
+    def application_gravite(self):
+        self.hero.rect.y += self.gravite + self.resistance
+        # Vérification d'une collision entre le sol et joueur
+        if self.ground.rect.colliderect(self.hero.rect):
+            self.resistance = -10
+            self.collision_ground = True
+            self.hero.nb_jump = 0
+        else:
+            self.resistance = 0
+        if self.hero.jumped and self.collision_ground:
+            if self.hero.nb_jump < 3:
+                self.hero.jumpe()
+
 
 class Attack_hero(pg.sprite.Sprite):
     def __init__(self,hero):
         super(Attack_hero, self).__init__()
-        self.vitesse_attack = 5
+        self.vitesse_attack = 10
         self.hero = hero
         projectile = trouver_image("projectile.png")
         self.image = pg.image.load(projectile)
@@ -89,7 +127,7 @@ class Attack_hero(pg.sprite.Sprite):
         #self.rect.y =((0.5*self.rect.x) /(self.vitesse_attack * math.cos(45))) + (self.vitesse_attack * self.rect.x * math.tan(45)) + self.rect.y
         # Verification et suppression de l'attque si celui-ci est en dehors de l'ecran
         if self.rect.x > 1080:
-            self.remouve
+            self.remouve()
 
 class Animation(pg.sprite.Sprite):
     def __init__(self,sprite_name):
@@ -120,9 +158,22 @@ dict_animation = {
     "hero" : load_animate_image("hero")
 }
 
-class Ground(pg.sprite.Sprite):    # Classe du Sol
+# Classe du Sol
+class Ground(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.rect = pg.rect
+        self.rect = pg.Rect(0,650,1080,170)
+    def afficher_sol(self,surface):
+        pg.draw.rect(surface,(0,255,0), self.rect)
+
+class Ground_up(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.rect = pg.Rect(500,400,200,50)
+        self.rect1 = pg.Rect(600, 500, 200, 50)
+    def afficher_sol_up(self,surface):
+        pg.draw.rect(surface,(13,150,40), self.rect)
+        pg.draw.rect(surface, (13, 150, 40), self.rect1)
+
 
 
