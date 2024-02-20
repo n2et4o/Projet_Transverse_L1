@@ -38,6 +38,7 @@ class Hero(pg.sprite.Sprite):
         self.jump_down = 5
         self.nb_jump = 0
         self.jumped = False
+        self.direction = 1
 
 
     def jumpe(self):
@@ -105,7 +106,7 @@ class Game :
         else:
             self.resistance = 0
         if self.hero.jumped and self.collision_ground:
-            if self.hero.nb_jump < 3:
+            if self.hero.nb_jump < 2:
                 self.hero.jumpe()
 
 
@@ -120,14 +121,16 @@ class Attack_hero(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = hero.rect.x + 100
         self.rect.y = hero.rect.y + 100
+        self.direction = hero.direction
     def remouve(self):
         self.hero.all_attack.remove(self)
-    def mouv_attack(self):
-        self.rect.x += self.vitesse_attack
+    def mouv_attack(self,screen):
+        self.rect.x += self.vitesse_attack * self.direction
         #self.rect.y =((0.5*self.rect.x) /(self.vitesse_attack * math.cos(45))) + (self.vitesse_attack * self.rect.x * math.tan(45)) + self.rect.y
         # Verification et suppression de l'attque si celui-ci est en dehors de l'ecran
-        if self.rect.x > 1080:
+        if self.rect.x > screen.get_width():
             self.remouve()
+
 
 class Animation(pg.sprite.Sprite):
     def __init__(self,sprite_name):
