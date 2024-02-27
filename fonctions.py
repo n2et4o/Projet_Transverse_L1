@@ -1,6 +1,7 @@
 import pygame as pg
 pg.init()
-import os
+import os,time
+from pygame.sprite import Group
 
 # Adaptation du chemin d'accès à n'importe quel appareil
 def trouver_image(nom_image):
@@ -16,6 +17,9 @@ def trouver_image(nom_image):
     return None
 
 
+run0 = trouver_image("run_0.png")
+
+
 # Class du hero
 class Hero(pg.sprite.Sprite):
     def __init__(self,Game):
@@ -25,7 +29,6 @@ class Hero(pg.sprite.Sprite):
         self.pvmax = 100
         self.attack = 10
         self.vitesse_mouve = 11
-        run0 = trouver_image("run_0.png")
         self.image = pg.image.load(run0)
         self.image = pg.transform.scale(self.image,(150,150))
         self.rect = self.image.get_rect()
@@ -52,9 +55,9 @@ class Hero(pg.sprite.Sprite):
 
             if self.jump_down < 0:
                 self.jump_up = 0
-                self.jump_down = 5
+                self.jump_down = 9
                 self.jumped = False
-        self.rect.y = self.rect.y - (10 * (self.jump/2))
+        self.rect.y = self.rect.y - (12 * (self.jump/2))
 
     def move_right(self):
         #verification de s'il y'a collision
@@ -88,11 +91,14 @@ class Game :
         self.gravite = 10
         self.resistance = 0
         self.ground = Ground()
-        self.plac = Ground_up()
         self.collision_ground = False
         self.rect_limite = pg.Rect(0, 0, 1280, 720)
         self.clock = pg.time.Clock()
         self.fps = 30
+        self.platform_group = Group()
+        self.list_platform = [
+            pg.Rect(00,450,150,40),pg.Rect(400,450,150,40),pg.Rect(600,250,150,40),pg.Rect(200,250,150,40)
+        ]
 
     def collision(self,sprite,Group):
         return pg.sprite.spritecollide(sprite,Group,False, sprite.collide_mask)
@@ -108,6 +114,8 @@ class Game :
         if self.hero.jumped and self.collision_ground:
             if self.hero.nb_jump < 2:
                 self.hero.jumpe()
+        if self.hero.rect.y < 0:
+            self.hero.rect.y = 0
 
 
 class Attack_hero(pg.sprite.Sprite):
@@ -119,8 +127,8 @@ class Attack_hero(pg.sprite.Sprite):
         self.image = pg.image.load(projectile)
         self.image = pg.transform.scale(self.image, (50,50))
         self.rect = self.image.get_rect()
-        self.rect.x = hero.rect.x + 100
-        self.rect.y = hero.rect.y + 100
+        self.rect.x = hero.rect.x + 130
+        self.rect.y = hero.rect.y + 60
         self.direction = hero.direction
     def remouve(self):
         self.hero.all_attack.remove(self)
@@ -170,13 +178,12 @@ class Ground(pg.sprite.Sprite):
         pg.draw.rect(surface,(0,255,0), self.rect)
 
 class Ground_up(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,rect):
         super().__init__()
-        self.rect = pg.Rect(500,400,200,50)
-        self.rect1 = pg.Rect(600, 500, 200, 50)
-    def afficher_sol_up(self,surface):
-        pg.draw.rect(surface,(13,150,40), self.rect)
-        pg.draw.rect(surface, (13, 150, 40), self.rect1)
+        self.rect = rect
+    def afficher_platform(self,surface):
+        pg.draw.rect(surface,(51, 246, 255), self.rect)
+
 
 
 
