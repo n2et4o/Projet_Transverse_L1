@@ -1,6 +1,6 @@
 import pygame as pg
 pg.init()
-import os,time
+import os, time
 from pygame.sprite import Group
 
 # Adaptation du chemin d'accès à n'importe quel appareil
@@ -22,7 +22,7 @@ run0 = trouver_image("run_0.png")
 
 # Class du hero
 class Hero(pg.sprite.Sprite):
-    def __init__(self,Game):
+    def __init__(self, Game):
         super().__init__()
         self.game = Game
         self.pv = 100
@@ -30,7 +30,7 @@ class Hero(pg.sprite.Sprite):
         self.attack = 10
         self.vitesse_mouve = 11
         self.image = pg.image.load(run0)
-        self.image = pg.transform.scale(self.image,(150,150))
+        self.image = pg.transform.scale(self.image, (150,150))
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 400
@@ -43,9 +43,8 @@ class Hero(pg.sprite.Sprite):
         self.jumped = False
         self.direction = 1
 
-
     def jumpe(self):
-        if self.jumped :
+        if self.jumped:
             if self.jump_up >= 10:
                 self.jump_down -= 10
                 self.jump = self.jump_down
