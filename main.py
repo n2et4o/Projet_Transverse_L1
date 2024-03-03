@@ -5,7 +5,7 @@ pg.init()
 
 # Fenêtre du jeu
 pg.display.set_caption("Winter Grief")
-reso_h = 1080
+reso_h = 1280
 reso_l = 720
 screen = pg.display.set_mode((reso_h, reso_l))
 background_path = trouver_image("new_background.png")
