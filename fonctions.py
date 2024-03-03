@@ -1,6 +1,6 @@
 import pygame as pg
 pg.init()
-import os, time
+import os, time, sys
 from pygame.sprite import Group
 
 # Adaptation du chemin d'accès à n'importe quel appareil
