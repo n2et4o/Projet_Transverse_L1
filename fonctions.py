@@ -184,7 +184,7 @@ class Boss_first_phase(pg.sprite.Sprite):
         super().__init__()
         self.game = Game
         self.pv = 100
-        self.pvmax = 1000
+        self.pvmax = 700
         self.attack = 1
         boss_image = trouver_image('boss_de_glace.png')
         self.image = pg.image.load(boss_image)
@@ -193,6 +193,10 @@ class Boss_first_phase(pg.sprite.Sprite):
         self.rect.x = 820
         self.rect.y = 200
 
+    def update_health_bar(self, surface):
+        # Affichage de la bar de vie
+        pygame.draw.rect(surface, (60, 63, 60), [0, 0, self.pvmax, 5])
+        pygame.draw.rect(surface, (210, 63, 60), [0, 0, self.pv, 5])
 
-
-
+    def damage(self, amount):
+        self.pv -= amount

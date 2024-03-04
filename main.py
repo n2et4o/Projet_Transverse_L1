@@ -7,7 +7,7 @@ from fonctions import *
 pg.init()
 
 # Fenêtre du jeu
-pg.display.set_caption("storm Grief")
+pg.display.set_caption("Winter Grief")
 screen: Surface | SurfaceType = pg.display.set_mode((1280, 720))
 background_path = trouver_image("new_background.png")
 background = pg.image.load(background_path)
@@ -46,6 +46,7 @@ while running:
     elif game.pressed.get(pg.K_LEFT) and game.hero.rect.x > 0:
         game.hero.move_left()
 
+
     game.hero.rect.clamp_ip(game.hero.rect)
     # Application de gravite
 
@@ -63,6 +64,12 @@ while running:
     game.ground.afficher_sol(screen)
     #game.plac.afficher_sol_up(screen)
 
+    # Affichage du boss
+    screen.blit(game.boss.image,game.boss.rect)
+
+    # Mise à jour de la barre de vie du boss
+    game.boss.update_health_bar(screen)
+
     # Affichage du héros
     screen.blit(game.hero.image, game.hero.rect)
 
@@ -74,8 +81,6 @@ while running:
         i.mouv_attack()
         # i.health_bar(screen)
 
-    # Affichage du boss
-    screen.blit(game.boss.image,game.boss.rect)
 
     # Mise à jour de la barre de vie
     game.hero.health_bar(screen)
