@@ -1,3 +1,6 @@
+import pygame as pg
+from pygame import Surface, SurfaceType
+
 from fonctions import *
 
 # Initialisation de Pygame
@@ -45,7 +48,6 @@ while running:
         elif event.type == pg.KEYUP:
             game.pressed[event.key] = False
 
-
     # Vérification que la touche est pressée et que le hero ne sorte pas du cadre de l'écran
     if game.pressed.get(pg.K_RIGHT) and game.hero.rect.x + game.hero.rect.width < screen.get_width():
         game.hero.move_right()
@@ -65,6 +67,12 @@ while running:
 
     game.ground.afficher_sol(screen)
     #game.plac.afficher_sol_up(screen)
+
+    # Affichage du boss
+    screen.blit(game.boss.image,game.boss.rect)
+
+    # Mise à jour de la barre de vie du boss
+    game.boss.update_health_bar(screen)
 
     # Affichage du héros
     screen.blit(game.hero.image, game.hero.rect)
@@ -92,7 +100,7 @@ while running:
     # Mise à jour de la barre de vie
     game.hero.health_bar(screen)
 
-
+    pg.draw.rect(screen,(0,0,0),game.rect_limite,1)
 
     # Génerer les contours de l'écran pour definir les bordures
     #pg.draw.rect(screen,(0,0,0),game.rect_limite,1)

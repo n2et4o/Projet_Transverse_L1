@@ -1,4 +1,6 @@
 import pygame as pg
+import pygame.sprite
+
 pg.init()
 import os,time
 from pygame.sprite import Group
@@ -87,6 +89,7 @@ class Hero(pg.sprite.Sprite):
 class Game :
     def __init__(self):
         self.hero = Hero(self)
+        self.boss = Boss_first_phase()
         self.pressed = {}
         self.gravite = 10
         self.resistance = 0
@@ -139,7 +142,6 @@ class Attack_hero(pg.sprite.Sprite):
         if self.rect.x > screen.get_width():
             self.remouve()
 
-
 class Animation(pg.sprite.Sprite):
     def __init__(self,sprite_name):
         super().__init__()
@@ -185,5 +187,24 @@ class Ground_up(pg.sprite.Sprite):
         pg.draw.rect(surface,(51, 246, 255), self.rect)
 
 
+class Boss_first_phase(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.game = Game
+        self.pv = 100
+        self.pvmax = 700
+        self.attack = 1
+        boss_image = trouver_image('mob.png')
+        self.image = pg.image.load(boss_image)
+        self.image = pg.transform.scale(self.image,(500,500))
+        self.rect = self.image.get_rect()
+        self.rect.x = 820
+        self.rect.y = 200
 
+    def update_health_bar(self, surface):
+        # Affichage de la bar de vie
+        pygame.draw.rect(surface, (60, 63, 60), [0, 0, self.pvmax, 5])
+        pygame.draw.rect(surface, (210, 63, 60), [0, 0, self.pv, 5])
 
+    def damage(self, amount):
+        self.pv -= amount
