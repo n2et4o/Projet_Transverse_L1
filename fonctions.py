@@ -1,4 +1,6 @@
 import pygame as pg
+import pygame.sprite
+
 pg.init()
 import os
 
@@ -83,6 +85,8 @@ class Hero(pg.sprite.Sprite):
 class Game :
     def __init__(self):
         self.hero = Hero(self)
+        self.boss = Boss_first_phase()
+        # Groupe avec l'ensemble desdifférentes phases du boss
         self.pressed = {}
         self.gravite = 10
         self.resistance = 0
@@ -174,6 +178,21 @@ class Ground_up(pg.sprite.Sprite):
     def afficher_sol_up(self,surface):
         pg.draw.rect(surface,(13,150,40), self.rect)
         pg.draw.rect(surface, (13, 150, 40), self.rect1)
+
+class Boss_first_phase(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.game = Game
+        self.pv = 100
+        self.pvmax = 1000
+        self.attack = 1
+        boss_image = trouver_image('boss_de_glace.png')
+        self.image = pg.image.load(boss_image)
+        self.image = pg.transform.scale(self.image,(500,500))
+        self.rect = self.image.get_rect()
+        self.rect.x = 820
+        self.rect.y = 200
+
 
 
 

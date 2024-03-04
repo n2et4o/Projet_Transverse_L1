@@ -1,4 +1,6 @@
 import pygame as pg
+from pygame import Surface, SurfaceType
+
 from fonctions import *
 
 # Initialisation de Pygame
@@ -6,10 +8,10 @@ pg.init()
 
 # Fenêtre du jeu
 pg.display.set_caption("storm Grief")
-screen = pg.display.set_mode((1280, 720))
+screen: Surface | SurfaceType = pg.display.set_mode((1280, 720))
 background_path = trouver_image("new_background.png")
 background = pg.image.load(background_path)
-background = pg.transform.scale(background,(1280,720))
+background = pg.transform.scale(background,(1280, 720))
 
 # Chargement du jeu
 game = Game()
@@ -71,6 +73,9 @@ while running:
     for i in game.hero.all_attack:
         i.mouv_attack()
         # i.health_bar(screen)
+
+    # Affichage du boss
+    screen.blit(game.boss.image,game.boss.rect)
 
     # Mise à jour de la barre de vie
     game.hero.health_bar(screen)
