@@ -203,8 +203,8 @@ class Boss_first_phase(pg.sprite.Sprite):
 
     def update_health_bar(self, surface):
         # Affichage de la bar de vie
-        pygame.draw.rect(surface, (60, 63, 60), [0, 0, self.pvmax, 5])
-        pygame.draw.rect(surface, (210, 63, 60), [0, 0, self.pv, 5])
+        pygame.draw.rect(surface, (60, 63, 60), [400, 10, self.pvmax, 5])
+        pygame.draw.rect(surface, (210, 63, 60), [400, 10, self.pv, 5])
 
     def damage(self, amount):
         self.pv -= amount
