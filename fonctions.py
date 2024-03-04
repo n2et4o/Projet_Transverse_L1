@@ -186,7 +186,7 @@ class Boss_first_phase(pg.sprite.Sprite):
         self.pv = 100
         self.pvmax = 700
         self.attack = 1
-        boss_image = trouver_image('boss_de_glace.png')
+        boss_image = trouver_image('mob.png')
         self.image = pg.image.load(boss_image)
         self.image = pg.transform.scale(self.image,(500,500))
         self.rect = self.image.get_rect()
