@@ -208,3 +208,4 @@ class Boss_first_phase(pg.sprite.Sprite):
 
     def damage(self, amount):
         self.pv -= amount
+#hope this shit works

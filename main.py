@@ -108,6 +108,6 @@ while running:
     #game.clock.tick(game.fps)
     # Mise à jour de l'affichage
     pg.display.flip()
-
+#hope this shit works
 # Fermeture de Pygame
 pg.quit()
