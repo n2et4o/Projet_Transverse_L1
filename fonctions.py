@@ -2,8 +2,11 @@ import pygame as pg
 import pygame.sprite
 
 pg.init()
-import os,time
+import os,time, math, random
 from pygame.sprite import Group
+
+reso_h = 1280
+reso_l = 720
 
 # Adaptation du chemin d'accès à n'importe quel appareil
 def trouver_image(nom_image):
@@ -24,7 +27,7 @@ run0 = trouver_image("run_0.png")
 
 # Class du hero
 class Hero(pg.sprite.Sprite):
-    def __init__(self,Game):
+    def __init__(self, Game):
         super().__init__()
         self.game = Game
         self.pv = 100
@@ -198,6 +201,7 @@ class Boss_first_phase(pg.sprite.Sprite):
         self.image = pg.image.load(boss_image)
         self.image = pg.transform.scale(self.image,(500,500))
         self.rect = self.image.get_rect()
+        self.all_attack_boss = pg.sprite.Group()
         self.rect.x = 820
         self.rect.y = 200
 
@@ -208,4 +212,34 @@ class Boss_first_phase(pg.sprite.Sprite):
 
     def damage(self, amount):
         self.pv -= amount
-#hope this shit works
+
+    def Attack_boss(self):
+        self.all_attack_boss.add(Attack1_boss(self))
+
+class Attack1_boss(pg.sprite.Sprite):
+    def __init__(self, boss):
+        super(Attack1_boss, self).__init__()
+        self.boss = boss
+        projectile = trouver_image("projectile.png")
+        self.image = pg.image.load(projectile)
+        self.image = pg.transform.scale(self.image, (50,50))
+        self.rect = self.image.get_rect()
+        self.rect.x = boss.rect.x
+        self.rect.y = boss.rect.y + 150
+    def remouve(self):
+        self.boss.all_attack_boss.remove(self)
+    def mouv_attack(self,screen):
+        #créer un dictionnaire avec des variables pour que
+        self.vitesse_attack = 7
+        self.rect.x -= self.vitesse_attack + 0
+        # Paramètres de la trajectoire sinusoidale
+        amplitude = 30  # Amplitude de la sinusoidale
+        frequence = 0.01  # Fréquence angulaire de la sinusoidale
+        # Liste duo intéréssant : (30,0.01);
+        position_repos = reso_h // 2  # Position de repos (y) du projectile
+        self.rect.y += amplitude * math.sin(frequence * self.rect.x)
+
+        #self.rect.y =((0.5*self.rect.x) /(self.vitesse_attack * math.cos(45))) + (self.vitesse_attack * self.rect.x * math.tan(45)) + self.rect.y
+        # Verification et suppression de l'attque si celui-ci est en dehors de l'ecran
+        if self.rect.x < 0:
+            self.remouve()

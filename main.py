@@ -37,6 +37,7 @@ while running:
                 game.hero.image = pg.image.load(at)
                 game.hero.image = pg.transform.scale(game.hero.image, (150, 150))
                 game.hero.Attack()
+                game.boss.Attack_boss()
                 #game.hero.image = first
             # Pression sur la touche (up) pour effectuer un saut
             if event.key == pg.K_UP :
@@ -80,10 +81,16 @@ while running:
     # Affichage de l'attaque
     game.hero.all_attack.draw(screen)
 
+    # Affichage de l'attaque du boss
+    game.boss.all_attack_boss.draw(screen)
+
     # Boucle d'affichage du projectile
     for i in game.hero.all_attack:
         i.mouv_attack(screen)
         #i.health_bar(screen)
+
+    for i in game.boss.all_attack_boss:
+        i.mouv_attack(screen)
 
     # Création et affichage du des platformes
     for rectangle in game.list_platform:
@@ -108,6 +115,5 @@ while running:
     #game.clock.tick(game.fps)
     # Mise à jour de l'affichage
     pg.display.flip()
-#hope this shit works
 # Fermeture de Pygame
 pg.quit()
