@@ -8,6 +8,8 @@ from pygame.sprite import Group
 reso_h = 1280
 reso_l = 720
 
+clock = pygame.time.Clock()
+
 # Adaptation du chemin d'accès à n'importe quel appareil
 def trouver_image(nom_image):
     # Récupérer le répertoire racine du projet
@@ -129,7 +131,7 @@ class Attack_hero(pg.sprite.Sprite):
         super(Attack_hero, self).__init__()
         self.vitesse_attack = 10
         self.hero = hero
-        projectile = trouver_image("projectile.png")
+        projectile = trouver_image("fire.png")
         self.image = pg.image.load(projectile)
         self.image = pg.transform.scale(self.image, (50,50))
         self.rect = self.image.get_rect()
@@ -204,6 +206,8 @@ class Boss_first_phase(pg.sprite.Sprite):
         self.all_attack_boss = pg.sprite.Group()
         self.rect.x = 820
         self.rect.y = 200
+        self.last_attack_time = 0
+        self.attack_interval = 2
 
     def update_health_bar(self, surface):
         # Affichage de la bar de vie
@@ -216,11 +220,17 @@ class Boss_first_phase(pg.sprite.Sprite):
     def Attack_boss(self):
         self.all_attack_boss.add(Attack1_boss(self))
 
+    def update_attack(self):
+        current_time = time.time()
+        if current_time - self.last_attack_time > self.attack_interval:
+            self.last_attack_time = current_time
+            self.Attack_boss()
+
 class Attack1_boss(pg.sprite.Sprite):
     def __init__(self, boss):
         super(Attack1_boss, self).__init__()
         self.boss = boss
-        projectile = trouver_image("projectile.png")
+        projectile = trouver_image("fire.png")
         self.image = pg.image.load(projectile)
         self.image = pg.transform.scale(self.image, (50,50))
         self.rect = self.image.get_rect()

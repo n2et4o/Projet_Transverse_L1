@@ -14,6 +14,9 @@ screen = pg.display.set_mode((reso_h, reso_l))
 background_path = trouver_image("new_background.png")
 background = pg.image.load(background_path)
 background = pg.transform.scale(background,(reso_h,reso_l))
+boss = Boss_first_phase()
+boss_phase1_cooldown = 4000
+last_attack_boss = pg.time.get_ticks()
 
 # Chargement du jeu
 game = Game()
@@ -37,7 +40,6 @@ while running:
                 game.hero.image = pg.image.load(at)
                 game.hero.image = pg.transform.scale(game.hero.image, (150, 150))
                 game.hero.Attack()
-                game.boss.Attack_boss()
                 #game.hero.image = first
             # Pression sur la touche (up) pour effectuer un saut
             if event.key == pg.K_UP :
@@ -81,6 +83,11 @@ while running:
     # Affichage de l'attaque
     game.hero.all_attack.draw(screen)
 
+    time_now = pg.time.get_ticks()
+    if time_now - last_attack_boss > boss_phase1_cooldown:
+        game.boss.Attack_boss()
+        last_attack_boss = time_now
+
     # Affichage de l'attaque du boss
     game.boss.all_attack_boss.draw(screen)
 
@@ -115,5 +122,7 @@ while running:
     #game.clock.tick(game.fps)
     # Mise à jour de l'affichage
     pg.display.flip()
+
+    clock.tick(60)
 # Fermeture de Pygame
 pg.quit()
