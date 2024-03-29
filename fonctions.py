@@ -1,9 +1,11 @@
 import pygame as pg
 import pygame.sprite
+import math
 
 pg.init()
-import os,time
+import os, time
 from pygame.sprite import Group
+
 
 # Adaptation du chemin d'accès à n'importe quel appareil
 def trouver_image(nom_image):
@@ -24,7 +26,7 @@ run0 = trouver_image("run_0.png")
 
 # Class du hero
 class Hero(pg.sprite.Sprite):
-    def __init__(self,Game):
+    def __init__(self, Game):
         super().__init__()
         self.game = Game
         self.pv = 100
@@ -32,11 +34,12 @@ class Hero(pg.sprite.Sprite):
         self.attack = 10
         self.vitesse_mouve = 11
         self.image = pg.image.load(run0)
-        self.image = pg.transform.scale(self.image,(150,150))
+        self.image = pg.transform.scale(self.image, (150, 150))
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 400
         self.all_attack = pg.sprite.Group()
+        self.all_trajectoire = pg.sprite.Group()
         self.animation = Animation("hero")
         self.jump = 0
         self.jump_up = 0
@@ -44,10 +47,21 @@ class Hero(pg.sprite.Sprite):
         self.nb_jump = 0
         self.jumped = False
         self.direction = 1
+        self.t1 , self.t2 = 0,0
+        self.delta_temps = 0
 
+    def deltas(self, t1,t2,delta_temps):
+        delta_temps = t1 - t2
+        print("t1 = ",t1)
+        print("t2 = ",t2)
+        print("delta =",delta_temps)
+
+    def can_attack(self, temps_de_pause):
+        self.delta_temps = time.time() - self.t2
+        return self.delta_temps >= temps_de_pause
 
     def jumpe(self):
-        if self.jumped :
+        if self.jumped:
             if self.jump_up >= 10:
                 self.jump_down -= 10
                 self.jump = self.jump_down
@@ -59,34 +73,44 @@ class Hero(pg.sprite.Sprite):
                 self.jump_up = 0
                 self.jump_down = 9
                 self.jumped = False
-        self.rect.y = self.rect.y - (12 * (self.jump/2))
+        self.rect.y = self.rect.y - (12 * (self.jump / 2))
 
     def move_right(self):
-        #verification de s'il y'a collision
-        #if self.game.collision(self,):
+        # verification de s'il y'a collision
+        # if self.game.collision(self,):
         self.rect.x += self.vitesse_mouve
+
     def move_left(self):
         self.rect.x -= self.vitesse_mouve
+
     def move_up(self):
         self.rect.y -= self.vitesse_mouve
-    #def move_down(self):
-     #   self.rect.y += self.vitesse_mouve
+
+    # def move_down(self):
+    #   self.rect.y += self.vitesse_mouve
     def Attack(self):
         self.all_attack.add(Attack_hero(self))
+
+    def Trajectoire(self):
+        self.all_trajectoire.add(Trajectoire_hero(self))
+
     def update_animation(self):
         self.animation.animate()
         self.image = self.animation.image
+
     def health_bar(self, surface):
         # Couleur de la barre utilisant le code RGB (R,G,B)
         bar_color = (172, 255, 51)
         # Position de la barre de vie (x,y,width,height)
-        bar_position = [self.rect.x + 30,self.rect.y,self.pv,5]
-        #heart = trouver_image("keur.png")
-        #self.image = pg.image.load(heart)
-        #self.image = pg.transform.scale(self.image, (50, 50))
-        pg.draw.rect(surface,bar_color,bar_position)
-        bar_position = [self.rect.x + 30, self.rect.y,self.pvmax, 5]
-class Game :
+        bar_position = [self.rect.x + 30, self.rect.y, self.pv, 5]
+        # heart = trouver_image("keur.png")
+        # self.image = pg.image.load(heart)
+        # self.image = pg.transform.scale(self.image, (50, 50))
+        pg.draw.rect(surface, bar_color, bar_position)
+        bar_position = [self.rect.x + 30, self.rect.y, self.pvmax, 5]
+
+
+class Game:
     def __init__(self):
         self.hero = Hero(self)
         self.boss = Boss_first_phase()
@@ -100,11 +124,13 @@ class Game :
         self.fps = 30
         self.platform_group = Group()
         self.list_platform = [
-            pg.Rect(00,450,150,40),pg.Rect(400,450,150,40),pg.Rect(600,250,150,40),pg.Rect(200,250,150,40)
+            pg.Rect(00, 450, 150, 40), pg.Rect(400, 450, 150, 40), pg.Rect(600, 250, 150, 40),
+            pg.Rect(200, 250, 150, 40)
         ]
 
-    def collision(self,sprite,Group):
-        return pg.sprite.spritecollide(sprite,Group,False, sprite.collide_mask)
+    def collision(self, sprite, Group):
+        return pg.sprite.spritecollide(sprite, Group, False, sprite.collide_mask)
+
     def application_gravite(self):
         self.hero.rect.y += self.gravite + self.resistance
         # Vérification d'une collision entre le sol et joueur
@@ -121,70 +147,129 @@ class Game :
             self.hero.rect.y = 0
 
 
+class Trajectoire_hero(pg.sprite.Sprite):
+    def __init__(self, hero):
+        super().__init__()
+        self.vitesse = 50  # Vitesse initiale du projectile
+        self.hero = hero
+        self.angle = math.radians(45)  # Angle de lancement en radians
+
+        projectile = trouver_image("fire.png")
+        self.image = pg.image.load(projectile)
+        self.image = pg.transform.scale(self.image, (70, 70))
+        self.rect = self.image.get_rect()
+
+        self.direction = hero.direction
+        self.set_position()
+
+        self.start_ticks = pg.time.get_ticks()  # Sauvegarde le moment du lancement
+
+    def set_position(self):
+        if self.direction == 1:  # Direction droite
+            self.rect.x = self.hero.rect.x + self.hero.rect.width
+        else:  # Direction gauche
+            self.rect.x = self.hero.rect.x - self.image.get_width()
+        self.rect.y = self.hero.rect.y + self.hero.rect.height // 2
+        self.x_init = self.rect.x
+        self.y_init = self.rect.y
+
+    def remove_trajectoire(self):
+        self.hero.all_trajectoire.remove(self)
+
+    def move_trajectoire(self, screen):
+        ticks = pg.time.get_ticks()
+        temps = (ticks - self.start_ticks) / 1000  # Temps en secondes
+
+        # Calcul de la position x en utilisant la vitesse initiale et l'angle
+
+        # Calcul de la position y en prenant en compte la gravité
+        g = 9.81  # Accélération due à la gravité (en m/s^2, ajustez pour votre échelle)
+
+        temps_accelere = temps * 10  # Multiplier le temps par un facteur pour accélérer
+        self.rect.x = self.x_init + self.vitesse * math.cos(self.angle) * temps_accelere * self.direction
+        self.rect.y = self.y_init - (self.vitesse * math.sin(self.angle) * temps_accelere - 0.5 * g * temps_accelere ** 2)
+
+        if self.rect.x < 0 or self.rect.x > screen.get_width() or self.rect.y > screen.get_height():
+                self.remove_trajectoire()
+                print("fire ball supprimé")
+
+
+
+
 class Attack_hero(pg.sprite.Sprite):
-    def __init__(self,hero):
+    def __init__(self, hero):
         super(Attack_hero, self).__init__()
         self.vitesse_attack = 10
         self.hero = hero
-        projectile = trouver_image("projectile.png")
+        projectile = trouver_image("fire_2.png")
         self.image = pg.image.load(projectile)
-        self.image = pg.transform.scale(self.image, (50,50))
+        self.image = pg.transform.scale(self.image, (70, 70))
         self.rect = self.image.get_rect()
         self.rect.x = hero.rect.x + 130
         self.rect.y = hero.rect.y + 60
         self.direction = hero.direction
+
     def remouve(self):
         self.hero.all_attack.remove(self)
-    def mouv_attack(self,screen):
+
+    def mouv_attack(self, screen):
         self.rect.x += self.vitesse_attack * self.direction
-        #self.rect.y =((0.5*self.rect.x) /(self.vitesse_attack * math.cos(45))) + (self.vitesse_attack * self.rect.x * math.tan(45)) + self.rect.y
+        # self.rect.y =((0.5*self.rect.x) /(self.vitesse_attack * math.cos(45))) + (self.vitesse_attack * self.rect.x * math.tan(45)) + self.rect.y
         # Verification et suppression de l'attque si celui-ci est en dehors de l'ecran
         if self.rect.x > screen.get_width():
             self.remouve()
 
+
 class Animation(pg.sprite.Sprite):
-    def __init__(self,sprite_name):
+    def __init__(self, sprite_name):
         super().__init__()
         self.image = pg.image.load(f'Image_du_jeu/{sprite_name}_items/run_0.png')
         self.image_current = 0
         self.images = dict_animation.get("hero")
-    def animate(self):
 
+    def animate(self):
         # Passer à l'image suivante
         self.image_current += 1
         # Vérification de la fin de l'animation
-        if self.image_current >= len(self.images) :
+        if self.image_current >= len(self.images):
             # Revenir à l'image de départ
             self.image_current = 0
         self.image = self.images[self.image_current]
+
+
 def load_animate_image(sprite_name):
     # Charger les images
     images = []
     path = f"Image_du_jeu/{sprite_name}_items/run_"
-    for num in range(0,6):
+    for num in range(0, 6):
         images_path = path + str(num) + ".png"
         images.append(pg.image.load(images_path))
 
     return images
 
+
 dict_animation = {
-    "hero" : load_animate_image("hero")
+    "hero": load_animate_image("hero")
 }
+
 
 # Classe du Sol
 class Ground(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.rect = pg.Rect(0,650,1280,170)
-    def afficher_sol(self,surface):
-        pg.draw.rect(surface,(0,255,0), self.rect)
+        self.rect = pg.Rect(0, 650, 1280, 170)
+
+    def afficher_sol(self, surface):
+        pg.draw.rect(surface, (0, 255, 0), self.rect)
+
 
 class Ground_up(pg.sprite.Sprite):
-    def __init__(self,rect):
+    def __init__(self, rect):
         super().__init__()
         self.rect = rect
-    def afficher_platform(self,surface):
-        pg.draw.rect(surface,(51, 246, 255), self.rect)
+
+    def afficher_platform(self, surface):
+        pg.draw.rect(surface, (51, 246, 255), self.rect)
 
 
 class Boss_first_phase(pg.sprite.Sprite):
@@ -196,7 +281,7 @@ class Boss_first_phase(pg.sprite.Sprite):
         self.attack = 1
         boss_image = trouver_image('mob.png')
         self.image = pg.image.load(boss_image)
-        self.image = pg.transform.scale(self.image,(500,500))
+        self.image = pg.transform.scale(self.image, (500, 500))
         self.rect = self.image.get_rect()
         self.rect.x = 820
         self.rect.y = 200
@@ -208,4 +293,4 @@ class Boss_first_phase(pg.sprite.Sprite):
 
     def damage(self, amount):
         self.pv -= amount
-#hope this shit works
+# hope this shit works

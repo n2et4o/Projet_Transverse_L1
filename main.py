@@ -20,9 +20,14 @@ game = Game()
 
 at = trouver_image("hero's_attack.png")
 
+# Temps entre chaque attaque du hero
+temps_de_pause = 0.1
+
 # Boucle du jeu
 running = True
 while running:
+    # Initilisation de t1
+    game.hero.t1 = time.time()
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
@@ -32,18 +37,34 @@ while running:
             game.pressed[event.key] = True
 
             # Pression sur la touche d'attaque
-            if game.pressed.get(pg.K_a):
+            if game.pressed.get(pg.K_a) and game.hero.can_attack(temps_de_pause):
                 first = game.hero.image
                 game.hero.image = pg.image.load(at)
                 game.hero.image = pg.transform.scale(game.hero.image, (150, 150))
                 game.hero.Attack()
-                #game.hero.image = first
+
+                # Initialisation de t2
+                game.hero.t2 = time.time()  # Mise à jour de t2 après l'attaque
+
+            if event.key == pg.K_t and game.hero.can_attack(temps_de_pause):
+                print("Touche T pressée")
+                try:
+                    nouveau_projectile = Trajectoire_hero(game.hero)
+                    game.hero.all_trajectoire.add(nouveau_projectile)
+                    game.hero.t2 = time.time()  # Mise à jour de t2 après l'attaque
+                    print("Projectile ajouté avec succès")
+                except Exception as e:
+                    print(f"Erreur lors de l'ajout du projectile: {e}")
+
             # Pression sur la touche (up) pour effectuer un saut
             if event.key == pg.K_UP :
                 game.hero.jumped = True
                 game.hero.nb_jump += 1
                 if game.hero.rect.y == 0:
                     game.hero.jumped = False
+            # Pression sur la touche (down) pour descendre des plateformes et descente du sol
+            if event.key == pg.K_DOWN and game.hero.rect.y <= 560:
+                game.resistance = 0
 
         elif event.type == pg.KEYUP:
             game.pressed[event.key] = False
@@ -56,8 +77,8 @@ while running:
         game.hero.move_left()
         game.hero.direction = -1
 
-
-    #game.hero.rect.clamp_ip(game.hero.rect)
+    # Test du delta_temps
+    #game.hero.deltas(game.hero.t1,game.hero.t2,game.hero.delta_temps)
 
     # Application de gravite
     game.application_gravite()
@@ -65,13 +86,13 @@ while running:
     # Affichage de l'arrière-plan
     screen.blit(background, (0, 0))
 
+    # Affichage du sol
     game.ground.afficher_sol(screen)
-    #game.plac.afficher_sol_up(screen)
 
     # Affichage du boss
     screen.blit(game.boss.image,game.boss.rect)
 
-    # Mise à jour de la barre de vie du boss
+    # Mise à jour de la barre de vie du Boss
     game.boss.update_health_bar(screen)
 
     # Affichage du héros
@@ -79,17 +100,20 @@ while running:
 
     # Affichage de l'attaque
     game.hero.all_attack.draw(screen)
+    game.hero.all_trajectoire.draw(screen)
 
     # Boucle d'affichage du projectile
     for i in game.hero.all_attack:
         i.mouv_attack(screen)
-        #i.health_bar(screen)
 
-    # Création et affichage du des platformes
+    for projectile in game.hero.all_trajectoire:
+        projectile.move_trajectoire(screen)
+
+    # Création et affichage des plateformes
     for rectangle in game.list_platform:
         platform = Ground_up(rectangle)
         game.platform_group.add(platform)
-        # Conditions pour marcher la platforme
+        # Conditions pour marcher sur la plateforme
         if game.hero.rect.midbottom[1] // 10 * 10 == platform.rect.top and game.hero.rect.colliderect(rectangle):
             game.resistance = -10
             game.hero.nb_jump = 0
@@ -105,9 +129,11 @@ while running:
     # Génerer les contours de l'écran pour definir les bordures
     #pg.draw.rect(screen,(0,0,0),game.rect_limite,1)
 
-    #game.clock.tick(game.fps)
+    game.clock.tick(game.fps)
     # Mise à jour de l'affichage
     pg.display.flip()
+
+
 #hope this shit works
 # Fermeture de Pygame
 pg.quit()
