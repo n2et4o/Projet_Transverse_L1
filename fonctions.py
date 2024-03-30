@@ -131,7 +131,7 @@ class Attack_hero(pg.sprite.Sprite):
         super(Attack_hero, self).__init__()
         self.vitesse_attack = 10
         self.hero = hero
-        projectile = trouver_image("fire.png")
+        projectile = trouver_image("fire_2.png")
         self.image = pg.image.load(projectile)
         self.image = pg.transform.scale(self.image, (50,50))
         self.rect = self.image.get_rect()
@@ -232,24 +232,31 @@ class Attack1_boss(pg.sprite.Sprite):
         self.boss = boss
         projectile = trouver_image("fire.png")
         self.image = pg.image.load(projectile)
-        self.image = pg.transform.scale(self.image, (50,50))
+        self.image = pg.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.x = boss.rect.x
-        self.rect.y = boss.rect.y + 150
+        self.rand_parameter = random.randint(0,1)
+        start_position = 150
+        if self.rand_parameter == 1:
+            start_position = random.choice([0, 150, 350])
+        self.rect.y = boss.rect.y + start_position
+        self.up_or_down = random.choice([-1, 1])
+
+
     def remouve(self):
         self.boss.all_attack_boss.remove(self)
     def mouv_attack(self,screen):
-        #créer un dictionnaire avec des variables pour que
-        self.vitesse_attack = 7
+        # Paramètres de la sinusoidale (vitesse_horizontale, amplitude, fréquence) pour faire des trajectoires intéréssantes
+        sinusoidal_parameters = [[7, 30, self.up_or_down * 0.01], [10, 30, self.up_or_down * 0.04]]
+        self.vitesse_attack = sinusoidal_parameters[self.rand_parameter][0]
         self.rect.x -= self.vitesse_attack + 0
         # Paramètres de la trajectoire sinusoidale
         amplitude = 30  # Amplitude de la sinusoidale
         frequence = 0.01  # Fréquence angulaire de la sinusoidale
-        # Liste duo intéréssant : (30,0.01);
-        position_repos = reso_h // 2  # Position de repos (y) du projectile
-        self.rect.y += amplitude * math.sin(frequence * self.rect.x)
+        print(self.rand_parameter)
+        self.rect.y += sinusoidal_parameters[self.rand_parameter][1] * math.sin(sinusoidal_parameters[self.rand_parameter][2] * self.rect.x)
 
         #self.rect.y =((0.5*self.rect.x) /(self.vitesse_attack * math.cos(45))) + (self.vitesse_attack * self.rect.x * math.tan(45)) + self.rect.y
-        # Verification et suppression de l'attque si celui-ci est en dehors de l'ecran
+        # Verification et suppression de l'attaque si celle-ci est en dehors de l'écran
         if self.rect.x < 0:
             self.remouve()
