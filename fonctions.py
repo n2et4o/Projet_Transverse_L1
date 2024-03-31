@@ -219,6 +219,7 @@ class Boss_first_phase(pg.sprite.Sprite):
 
     def Attack_boss(self):
         self.all_attack_boss.add(Attack1_boss(self))
+        self.all_attack_boss.add(GroundAttack(self))
 
     def update_attack(self):
         current_time = time.time()
@@ -253,10 +254,51 @@ class Attack1_boss(pg.sprite.Sprite):
         # Paramètres de la trajectoire sinusoidale
         amplitude = 30  # Amplitude de la sinusoidale
         frequence = 0.01  # Fréquence angulaire de la sinusoidale
-        print(self.rand_parameter)
         self.rect.y += sinusoidal_parameters[self.rand_parameter][1] * math.sin(sinusoidal_parameters[self.rand_parameter][2] * self.rect.x)
 
         #self.rect.y =((0.5*self.rect.x) /(self.vitesse_attack * math.cos(45))) + (self.vitesse_attack * self.rect.x * math.tan(45)) + self.rect.y
         # Verification et suppression de l'attaque si celle-ci est en dehors de l'écran
         if self.rect.x < 0:
             self.remouve()
+
+class GroundAttack(pg.sprite.Sprite):
+    def __init__(self, boss):
+        super(GroundAttack, self).__init__()
+        self.boss = boss
+        projectile = trouver_image("fire_2.png")
+        self.image = pg.image.load(projectile)
+        self.rect = self.image.get_rect()
+        self.rect.x = boss.rect.x  # Position initiale sous le sol
+        self.rect.y = 650
+        self.speed = 25
+        self.state = "grounded"  # État initial : l'arme est cachée sous le sol
+        self.last_show_time = time.time()
+
+    def remouve(self):
+        self.boss.all_attack_boss.remove(self)
+
+    def mouv_attack(self, screen):
+        if self.state == "grounded":
+            print("grounded")
+            # L'arme monte progressivement du sol
+            current_time = time.time()
+            if current_time - self.last_show_time >= 1:
+                self.state = "up"
+
+        elif self.state == "up":
+            # L'arme sort complètement du sol
+            self.rect.y -= self.speed
+            if self.rect.y <= 170:  # Hauteur maximale atteinte par l'arme
+                self.state = "waiting"
+
+        elif self.state == "waiting":
+            # Attente avant de commencer à descendre
+            current_time = time.time()
+            if current_time - self.last_show_time >= 2:
+                self.state = "down"
+
+        elif self.state == "down":
+            # L'arme redescend lentement
+            self.rect.y += self.speed
+            if self.rect.y >= 700:  # Retour à la position initiale sous le sol
+                self.remouve()
