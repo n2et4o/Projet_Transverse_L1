@@ -15,7 +15,8 @@ background_path = trouver_image("new_background.png")
 background = pg.image.load(background_path)
 background = pg.transform.scale(background,(reso_h,reso_l))
 boss = Boss_first_phase()
-boss_phase1_cooldown = 4000
+start_cooldown = 4000
+boss_phase1_cooldown = 800
 last_attack_boss = pg.time.get_ticks()
 
 # Chargement du jeu
@@ -87,8 +88,8 @@ while running:
     #Conditions pour l'apparition d'une nouvelle attaque
     #Première condition : attendre le délai au début du jeu pour pas que le joueur se fasse attaquer tout de suite
     #Deuxième condition : attendre qu'il n'y ai plus d'attaque pour en lancer une autre
-    if time_now - last_attack_boss > boss_phase1_cooldown and not game.boss.all_attack_boss:
-        pg.time.delay(1000)
+    if time_now - game.boss.last_remove > start_cooldown + boss_phase1_cooldown and not game.boss.all_attack_boss:
+        start_cooldown = 0
         game.boss.Attack_boss()
 
     # Affichage de l'attaque du boss

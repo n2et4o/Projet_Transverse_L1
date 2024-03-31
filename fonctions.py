@@ -201,13 +201,14 @@ class Boss_first_phase(pg.sprite.Sprite):
         self.attack = 1
         boss_image = trouver_image('mob.png')
         self.image = pg.image.load(boss_image)
-        self.image = pg.transform.scale(self.image,(500,500))
+        self.image = pg.transform.scale(self.image, (500, 500))
         self.rect = self.image.get_rect()
         self.all_attack_boss = pg.sprite.Group()
         self.rect.x = 820
         self.rect.y = 200
         self.last_attack_time = 0
         self.attack_interval = 2
+        self.last_remove = pg.time.get_ticks()
 
     def update_health_bar(self, surface):
         # Affichage de la bar de vie
@@ -248,7 +249,9 @@ class Attack1_boss(pg.sprite.Sprite):
 
 
     def remouve(self):
+        self.boss.last_remove = pg.time.get_ticks()
         self.boss.all_attack_boss.remove(self)
+
     def mouv_attack(self,screen):
         # Paramètres de la sinusoidale (vitesse_horizontale, amplitude, fréquence) pour faire des trajectoires intéréssantes
         sinusoidal_parameters = [[7, 30, self.up_or_down * 0.01], [10, 30, self.up_or_down * 0.04]]
@@ -261,7 +264,7 @@ class Attack1_boss(pg.sprite.Sprite):
 
         #self.rect.y =((0.5*self.rect.x) /(self.vitesse_attack * math.cos(45))) + (self.vitesse_attack * self.rect.x * math.tan(45)) + self.rect.y
         # Verification et suppression de l'attaque si celle-ci est en dehors de l'écran
-        if self.rect.x < -100:
+        if self.rect.x < 0:
             self.remouve()
 
 class GroundAttack(pg.sprite.Sprite):
@@ -278,6 +281,7 @@ class GroundAttack(pg.sprite.Sprite):
         self.last_show_time = time.time()
 
     def remouve(self):
+        self.boss.last_remove = pg.time.get_ticks()
         self.boss.all_attack_boss.remove(self)
 
     def mouv_attack(self, screen):
