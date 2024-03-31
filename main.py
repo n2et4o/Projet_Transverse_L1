@@ -84,9 +84,12 @@ while running:
     game.hero.all_attack.draw(screen)
 
     time_now = pg.time.get_ticks()
-    if time_now - last_attack_boss > boss_phase1_cooldown:
+    #Conditions pour l'apparition d'une nouvelle attaque
+    #Première condition : attendre le délai au début du jeu pour pas que le joueur se fasse attaquer tout de suite
+    #Deuxième condition : attendre qu'il n'y ai plus d'attaque pour en lancer une autre
+    if time_now - last_attack_boss > boss_phase1_cooldown and not game.boss.all_attack_boss:
+        pg.time.delay(1000)
         game.boss.Attack_boss()
-        last_attack_boss = time_now
 
     # Affichage de l'attaque du boss
     game.boss.all_attack_boss.draw(screen)

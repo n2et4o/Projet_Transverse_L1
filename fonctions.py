@@ -218,8 +218,11 @@ class Boss_first_phase(pg.sprite.Sprite):
         self.pv -= amount
 
     def Attack_boss(self):
-        self.all_attack_boss.add(Attack1_boss(self))
-        self.all_attack_boss.add(GroundAttack(self))
+        rand_attack = random.randint(0, 1) == 1
+        if rand_attack == 0:
+            self.all_attack_boss.add(GroundAttack(self))
+        if rand_attack == 1:
+            self.all_attack_boss.add(Attack1_boss(self))
 
     def update_attack(self):
         current_time = time.time()
@@ -258,7 +261,7 @@ class Attack1_boss(pg.sprite.Sprite):
 
         #self.rect.y =((0.5*self.rect.x) /(self.vitesse_attack * math.cos(45))) + (self.vitesse_attack * self.rect.x * math.tan(45)) + self.rect.y
         # Verification et suppression de l'attaque si celle-ci est en dehors de l'écran
-        if self.rect.x < 0:
+        if self.rect.x < -100:
             self.remouve()
 
 class GroundAttack(pg.sprite.Sprite):
@@ -268,9 +271,9 @@ class GroundAttack(pg.sprite.Sprite):
         projectile = trouver_image("fire_2.png")
         self.image = pg.image.load(projectile)
         self.rect = self.image.get_rect()
-        self.rect.x = boss.rect.x  # Position initiale sous le sol
+        self.rect.x = boss.rect.x - random.choice([170, 370, 570])  # Position initiale sous le sol
         self.rect.y = 650
-        self.speed = 25
+        self.speed = 50
         self.state = "grounded"  # État initial : l'arme est cachée sous le sol
         self.last_show_time = time.time()
 
@@ -279,7 +282,6 @@ class GroundAttack(pg.sprite.Sprite):
 
     def mouv_attack(self, screen):
         if self.state == "grounded":
-            print("grounded")
             # L'arme monte progressivement du sol
             current_time = time.time()
             if current_time - self.last_show_time >= 1:
@@ -294,7 +296,7 @@ class GroundAttack(pg.sprite.Sprite):
         elif self.state == "waiting":
             # Attente avant de commencer à descendre
             current_time = time.time()
-            if current_time - self.last_show_time >= 2:
+            if current_time - self.last_show_time >= 2.5:
                 self.state = "down"
 
         elif self.state == "down":
