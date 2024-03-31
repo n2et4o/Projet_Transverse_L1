@@ -1,27 +1,37 @@
 import pygame as pg
 from pygame import Surface, SurfaceType
-
 from fonctions import *
 
 # Initialisation de Pygame
 pg.init()
+pg.joystick.init()  # Initialisation du système de joystick
 
 # Fenêtre du jeu
 pg.display.set_caption("Winter Grief")
 reso_h = 1280
 reso_l = 720
 screen = pg.display.set_mode((reso_h, reso_l))
-background_path = trouver_image("new_background.png")
+background_path = trouver_image("GDG.jpg")
 background = pg.image.load(background_path)
-background = pg.transform.scale(background,(reso_h,reso_l))
+background = pg.transform.scale(background, (reso_h, reso_l))
 
 # Chargement du jeu
 game = Game()
 
 at = trouver_image("hero's_attack.png")
-
+keur = trouver_image("keur.png")
 # Temps entre chaque attaque du hero
 temps_de_pause = 0.1
+
+# Vérifiez s'il y a au moins une manette connectée
+if pg.joystick.get_count() > 0:
+    joystick = pg.joystick.Joystick(0)  # Créez une instance de la première manette
+    joystick.init()  # Initialisez la manette
+    go = True
+    print("Manette détectée")
+else:
+    go = False
+    print("Aucune manette détectée")
 
 # Boucle du jeu
 running = True
@@ -36,49 +46,119 @@ while running:
         elif event.type == pg.KEYDOWN:
             game.pressed[event.key] = True
 
-            # Pression sur la touche d'attaque
+            # Pression sur la touche 'a' pour réaliser une attaque
             if game.pressed.get(pg.K_a) and game.hero.can_attack(temps_de_pause):
                 first = game.hero.image
                 game.hero.image = pg.image.load(at)
                 game.hero.image = pg.transform.scale(game.hero.image, (150, 150))
                 game.hero.Attack()
+                if game.hero.delta_temps >= 2:
+                    game.hero.image = first
+
+                if game.hero.direction == -1:
+                    game.hero.image = pg.transform.flip(game.hero.image, True, False)
+                    game.hero.Attack()
+                    if game.hero.delta_temps >= 2:
+                        game.hero.image = first
 
                 # Initialisation de t2
                 game.hero.t2 = time.time()  # Mise à jour de t2 après l'attaque
+                #print(" delta = ", game.hero.delta_temps)
 
+            # Pression sur la touche 't' pour réaliser une attaque parabolique
             if event.key == pg.K_t and game.hero.can_attack(temps_de_pause):
-                print("Touche T pressée")
+                #print("Touche T pressée")
                 try:
                     nouveau_projectile = Trajectoire_hero(game.hero)
                     game.hero.all_trajectoire.add(nouveau_projectile)
                     game.hero.t2 = time.time()  # Mise à jour de t2 après l'attaque
-                    print("Projectile ajouté avec succès")
+                    #print("Projectile ajouté avec succès")
                 except Exception as e:
                     print(f"Erreur lors de l'ajout du projectile: {e}")
 
             # Pression sur la touche (up) pour effectuer un saut
-            if event.key == pg.K_UP :
+            if event.key == pg.K_UP:
                 game.hero.jumped = True
                 game.hero.nb_jump += 1
                 if game.hero.rect.y == 0:
                     game.hero.jumped = False
             # Pression sur la touche (down) pour descendre des plateformes et descente du sol
-            if event.key == pg.K_DOWN and game.hero.rect.y <= 560:
+            if event.key == pg.K_DOWN and game.hero.rect.y <= 500:
                 game.resistance = 0
 
         elif event.type == pg.KEYUP:
             game.pressed[event.key] = False
 
+        # Pression d'une touche sur la manette
+        if event.type == pg.JOYBUTTONDOWN:
+            temps_de_pause = 0.1
+            # Exemple pour un bouton (le bouton X de la PS5 pour sauter)
+            if event.button == 0:  # Supposons que le bouton 0 soit le bouton X
+                game.hero.jumped = True
+                game.hero.nb_jump += 1
+                if game.hero.rect.y == 0:
+                    game.hero.jumped = False
+
+            if joystick.get_button(2) and game.hero.can_attack(temps_de_pause):  # Supposons que le bouton 2 soit le bouton "Carré"
+                first = game.hero.image
+                game.hero.image = pg.image.load(at)
+                game.hero.image = pg.transform.scale(game.hero.image, (150, 150))
+                game.hero.Attack()
+                if game.hero.delta_temps >= 2:
+                    game.hero.image = first
+
+                if game.hero.direction == -1:
+                    game.hero.image = pg.transform.flip(game.hero.image, True, False)
+                    game.hero.Attack()
+                    if game.hero.delta_temps >= 2:
+                        game.hero.image = first
+
+            if joystick.get_button(1) and game.hero.can_attack(temps_de_pause):  # Supposons que le bouton 1 soit le bouton "Cercle"
+                nouveau_projectile = Trajectoire_hero(game.hero)
+                game.hero.all_trajectoire.add(nouveau_projectile)
+                game.hero.t2 = time.time()  # Mise à jour de t2 après l'attaque
+            # Vers le bas
+            if joystick.get_button(12) > 0.1 and game.hero.rect.y <= 500:
+                game.resistance = 0
+
+            if joystick.get_button(5):
+                pygame.joystick.quit()
+
+        elif event.type == pg.JOYBUTTONUP:
+            pass
+            #print("Bouton relâché")
+
     # Vérification que la touche est pressée et que le hero ne sorte pas du cadre de l'écran
     if game.pressed.get(pg.K_RIGHT) and game.hero.rect.x + game.hero.rect.width < screen.get_width():
         game.hero.move_right()
+        game.hero.start_animation()
         game.hero.direction = 1
     elif game.pressed.get(pg.K_LEFT) and game.hero.rect.x > 0:
         game.hero.move_left()
         game.hero.direction = -1
+        game.hero.start_animation()
+
+    if go:
+        # Implementation de l'utilisation d'une manette
+        # Lecture des entrées du joystick
+        left_stick_x = joystick.get_axis(0)
+        left_stick_y = joystick.get_axis(1)
+
+        # Déplacement du héros avec le stick gauche
+        if left_stick_x > 0.1 and game.hero.rect.x + game.hero.rect.width < screen.get_width():  # Déplacez à droite
+            game.hero.move_right()
+            game.hero.start_animation()
+            game.hero.direction = 1
+        elif left_stick_x < -0.1 and game.hero.rect.x > 0:  # Déplacez à gauche
+            game.hero.move_left()
+            game.hero.start_animation()
+            game.hero.direction = -1
+
+
+
 
     # Test du delta_temps
-    #game.hero.deltas(game.hero.t1,game.hero.t2,game.hero.delta_temps)
+    # game.hero.deltas(game.hero.t1,game.hero.t2,game.hero.delta_temps)
 
     # Application de gravite
     game.application_gravite()
@@ -90,7 +170,7 @@ while running:
     game.ground.afficher_sol(screen)
 
     # Affichage du boss
-    screen.blit(game.boss.image,game.boss.rect)
+    screen.blit(game.boss.image, game.boss.rect)
 
     # Mise à jour de la barre de vie du Boss
     game.boss.update_health_bar(screen)
@@ -105,9 +185,14 @@ while running:
     # Boucle d'affichage du projectile
     for i in game.hero.all_attack:
         i.mouv_attack(screen)
+        if game.boss.rect.colliderect(i.rect) and i.rect.x > game.boss.rect.x + 80:
+            game.hero.all_attack.remove(i)
 
     for projectile in game.hero.all_trajectoire:
         projectile.move_trajectoire(screen)
+        if game.boss.rect.colliderect(projectile.rect) and projectile.rect.x > game.boss.rect.x + 100:
+            game.hero.all_trajectoire.remove(projectile)
+            print("pos x =",projectile.rect.x)
 
     # Création et affichage des plateformes
     for rectangle in game.list_platform:
@@ -121,19 +206,44 @@ while running:
     for platform in game.platform_group:
         platform.afficher_platform(screen)
 
+
+    # Ensuite, dans votre boucle principale, affichez les cœurs en fonction des PV du héros
+    for i in range(game.hero.nombre_coeurs()):
+        # Supposons que vous avez une image de cœur chargée et prête à être utilisée
+        coeur_image = pg.image.load(keur)
+        coeur_image = pg.transform.scale(coeur_image,(70,70))
+        coeur_rect = coeur_image.get_rect(topleft=(0 + i * 30, 0))  # Changer la position pour chaque cœur
+        screen.blit(coeur_image, coeur_rect)
+
+
+    if (game.hero.pv > 0):
+        coeur_image = pg.image.load(keur)
+        coeur_image = pg.transform.scale(coeur_image, (70, 70))
+        coeur_rect = coeur_image.get_rect(topleft=(0 + 0 * 30, 0))  # Changer la position pour chaque cœur
+        screen.blit(coeur_image, coeur_rect)
+
+
+    if game.hero.rect.colliderect(game.boss.rect) and game.hero.rect.x > game.boss.rect.x:
+        game.hero.rect.x -= 150
+        game.hero.get_degats = 5
+        game.hero.pv -= game.hero.get_degats
+        game.hero.get_degats = 0
+
+
+
+
+
     # Mise à jour de la barre de vie
     game.hero.health_bar(screen)
+    # Animation lorsque le hero marche
+    game.hero.update_animation(game.hero.direction)
 
-    pg.draw.rect(screen,(0,0,0),game.rect_limite,1)
-
-    # Génerer les contours de l'écran pour definir les bordures
-    #pg.draw.rect(screen,(0,0,0),game.rect_limite,1)
-
+    # gestion des FPS (Framerate Per Second)
     game.clock.tick(game.fps)
     # Mise à jour de l'affichage
     pg.display.flip()
 
-
-#hope this shit works
+# hope this shit works
 # Fermeture de Pygame
+
 pg.quit()
