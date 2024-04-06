@@ -328,7 +328,7 @@ class Boss_first_phase(pg.sprite.Sprite):
         self.last_attack_time = 0
         self.attack_interval = 2
         self.last_remove = pg.time.get_ticks()
-        #self.dead = False
+        self.dead = False
 
     def update_health_bar(self, surface):
         # Affichage de la bar de vie

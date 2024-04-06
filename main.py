@@ -71,7 +71,7 @@ while running:
                 #print(" delta = ", game.hero.delta_temps)
 
             # Pression sur la touche 't' pour réaliser une attaque parabolique
-            if event.key == pg.K_t and game.hero.can_attack(temps_de_pause):
+            if event.key == pg.K_e and game.hero.can_attack(temps_de_pause):
                 #print("Touche T pressée")
                 try:
                     nouveau_projectile = Trajectoire_hero(game.hero)
@@ -203,12 +203,12 @@ while running:
     # Boucle d'affichage du projectile
     for i in game.hero.all_attack:
         i.mouv_attack(screen)
-        if game.boss.rect.colliderect(i.rect) and i.rect.x > game.boss.rect.x + 80:
+        if game.boss1.rect.colliderect(i.rect) and i.rect.x > game.boss1.rect.x + 80:
             game.hero.all_attack.remove(i)
 
     for projectile in game.hero.all_trajectoire:
         projectile.move_trajectoire(screen)
-        if game.boss.rect.colliderect(projectile.rect) and projectile.rect.x > game.boss.rect.x + 100:
+        if game.boss1.rect.colliderect(projectile.rect) and projectile.rect.x > game.boss1.rect.x + 100:
             game.hero.all_trajectoire.remove(projectile)
             print("pos x =",projectile.rect.x)
 
@@ -245,7 +245,7 @@ while running:
         screen.blit(coeur_image, coeur_rect)
 
 
-    if game.hero.rect.colliderect(game.boss.rect) and game.hero.rect.x > game.boss.rect.x:
+    if game.hero.rect.colliderect(game.boss1.rect) and game.hero.rect.x > game.boss1.rect.x:
         game.hero.rect.x -= 150
         game.hero.get_degats = 5
         game.hero.pv -= game.hero.get_degats
