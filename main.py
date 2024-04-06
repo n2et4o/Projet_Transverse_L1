@@ -13,6 +13,11 @@ reso_l = 720
 screen = pg.display.set_mode((reso_h, reso_l))
 background_path = trouver_image("GDG.jpg")
 background = pg.image.load(background_path)
+background = pg.transform.scale(background,(reso_h,reso_l))
+boss1 = Boss_first_phase()
+start_cooldown = 4000
+boss_phase1_cooldown = 800
+last_attack_boss1 = pg.time.get_ticks()
 background = pg.transform.scale(background, (reso_h, reso_l))
 
 # Chargement du jeu
@@ -169,11 +174,8 @@ while running:
     # Affichage du sol
     game.ground.afficher_sol(screen)
 
-    # Affichage du boss
-    screen.blit(game.boss.image, game.boss.rect)
-
-    # Mise à jour de la barre de vie du Boss
-    game.boss.update_health_bar(screen)
+    # Mise à jour de la barre de vie du boss
+    game.boss1.update_health_bar(screen)
 
     # Affichage du héros
     screen.blit(game.hero.image, game.hero.rect)
@@ -181,6 +183,22 @@ while running:
     # Affichage de l'attaque
     game.hero.all_attack.draw(screen)
     game.hero.all_trajectoire.draw(screen)
+
+    # Affichage du boss
+    game.bosssprite.draw(screen)
+    if game.boss1.dead:
+        game.boss1.remove()
+        print("BOSSDE")
+    time_now = pg.time.get_ticks()
+    #Conditions pour l'apparition d'une nouvelle attaque
+    #Première condition : attendre le délai au début du jeu pour pas que le joueur se fasse attaquer tout de suite
+    #Deuxième condition : attendre qu'il n'y ai plus d'attaque pour en lancer une autre
+    if time_now - game.boss1.last_remove > start_cooldown + boss_phase1_cooldown and not game.boss1.all_attack_boss:
+        start_cooldown = 0
+        game.boss1.Attack_boss()
+
+    # Affichage de l'attaque du boss
+    game.boss1.all_attack_boss.draw(screen)
 
     # Boucle d'affichage du projectile
     for i in game.hero.all_attack:
@@ -195,6 +213,10 @@ while running:
             print("pos x =",projectile.rect.x)
 
     # Création et affichage des plateformes
+    for i in game.boss1.all_attack_boss:
+        i.mouv_attack(screen)
+
+    # Création et affichage du des platformes
     for rectangle in game.list_platform:
         platform = Ground_up(rectangle)
         game.platform_group.add(platform)
@@ -243,7 +265,7 @@ while running:
     # Mise à jour de l'affichage
     pg.display.flip()
 
-# hope this shit works
-# Fermeture de Pygame
+    clock.tick(60)
 
+# Fermeture de Pygame
 pg.quit()
