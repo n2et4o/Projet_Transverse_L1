@@ -14,10 +14,10 @@ screen = pg.display.set_mode((reso_h, reso_l))
 background_path = trouver_image("new_background.png")
 background = pg.image.load(background_path)
 background = pg.transform.scale(background,(reso_h,reso_l))
-boss = Boss_first_phase()
+boss1 = Boss_first_phase()
 start_cooldown = 4000
 boss_phase1_cooldown = 800
-last_attack_boss = pg.time.get_ticks()
+last_attack_boss1 = pg.time.get_ticks()
 
 # Chargement du jeu
 game = Game()
@@ -72,11 +72,8 @@ while running:
     game.ground.afficher_sol(screen)
     #game.plac.afficher_sol_up(screen)
 
-    # Affichage du boss
-    screen.blit(game.boss.image,game.boss.rect)
-
     # Mise à jour de la barre de vie du boss
-    game.boss.update_health_bar(screen)
+    game.boss1.update_health_bar(screen)
 
     # Affichage du héros
     screen.blit(game.hero.image, game.hero.rect)
@@ -84,23 +81,28 @@ while running:
     # Affichage de l'attaque
     game.hero.all_attack.draw(screen)
 
+    # Affichage du boss
+    game.bosssprite.draw(screen)
+    if game.boss1.dead:
+        game.boss1.remove()
+        print("BOSSDE")
     time_now = pg.time.get_ticks()
     #Conditions pour l'apparition d'une nouvelle attaque
     #Première condition : attendre le délai au début du jeu pour pas que le joueur se fasse attaquer tout de suite
     #Deuxième condition : attendre qu'il n'y ai plus d'attaque pour en lancer une autre
-    if time_now - game.boss.last_remove > start_cooldown + boss_phase1_cooldown and not game.boss.all_attack_boss:
+    if time_now - game.boss1.last_remove > start_cooldown + boss_phase1_cooldown and not game.boss1.all_attack_boss:
         start_cooldown = 0
-        game.boss.Attack_boss()
+        game.boss1.Attack_boss()
 
     # Affichage de l'attaque du boss
-    game.boss.all_attack_boss.draw(screen)
+    game.boss1.all_attack_boss.draw(screen)
 
     # Boucle d'affichage du projectile
     for i in game.hero.all_attack:
         i.mouv_attack(screen)
         #i.health_bar(screen)
 
-    for i in game.boss.all_attack_boss:
+    for i in game.boss1.all_attack_boss:
         i.mouv_attack(screen)
 
     # Création et affichage du des platformes

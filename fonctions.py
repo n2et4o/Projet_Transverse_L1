@@ -91,10 +91,11 @@ class Hero(pg.sprite.Sprite):
         #self.image = pg.transform.scale(self.image, (50, 50))
         pg.draw.rect(surface,bar_color,bar_position)
         bar_position = [self.rect.x + 30, self.rect.y,self.pvmax, 5]
-class Game :
+class Game:
     def __init__(self):
         self.hero = Hero(self)
-        self.boss = Boss_first_phase()
+        self.boss1 = Boss_first_phase()
+        self.bosssprite = pg.sprite.Group()
         self.pressed = {}
         self.gravite = 10
         self.resistance = 0
@@ -107,6 +108,13 @@ class Game :
         self.list_platform = [
             pg.Rect(00,450,150,40),pg.Rect(400,450,150,40),pg.Rect(600,250,150,40),pg.Rect(200,250,150,40)
         ]
+        if self.boss1.pv > 0:
+            self.spawnboss1()
+            print("spawnd")
+
+    def spawnboss1(self):
+        self.boss1 = Boss_first_phase()
+        self.bosssprite.add(self.boss1)
 
     def collision(self,sprite,Group):
         return pg.sprite.spritecollide(sprite,Group,False, sprite.collide_mask)
@@ -209,6 +217,7 @@ class Boss_first_phase(pg.sprite.Sprite):
         self.last_attack_time = 0
         self.attack_interval = 2
         self.last_remove = pg.time.get_ticks()
+        #self.dead = False
 
     def update_health_bar(self, surface):
         # Affichage de la bar de vie
@@ -217,6 +226,12 @@ class Boss_first_phase(pg.sprite.Sprite):
 
     def damage(self, amount):
         self.pv -= amount
+        '''
+        if self.pv <= 0:
+            self.dead = True
+            self.remove()
+            print(("bossde"))
+            '''
 
     def Attack_boss(self):
         rand_attack = random.randint(0, 1) == 1
@@ -224,12 +239,6 @@ class Boss_first_phase(pg.sprite.Sprite):
             self.all_attack_boss.add(GroundAttack(self))
         if rand_attack == 1:
             self.all_attack_boss.add(Attack1_boss(self))
-
-    def update_attack(self):
-        current_time = time.time()
-        if current_time - self.last_attack_time > self.attack_interval:
-            self.last_attack_time = current_time
-            self.Attack_boss()
 
 class Attack1_boss(pg.sprite.Sprite):
     def __init__(self, boss):
@@ -274,7 +283,7 @@ class GroundAttack(pg.sprite.Sprite):
         projectile = trouver_image("fire_2.png")
         self.image = pg.image.load(projectile)
         self.rect = self.image.get_rect()
-        self.rect.x = boss.rect.x - random.choice([170, 370, 570])  # Position initiale sous le sol
+        self.rect.x = boss.rect.x - random.choice([170, 370, 570])  # Positions initiales sous le sol
         self.rect.y = 650
         self.speed = 50
         self.state = "grounded"  # État initial : l'arme est cachée sous le sol
@@ -283,6 +292,7 @@ class GroundAttack(pg.sprite.Sprite):
     def remouve(self):
         self.boss.last_remove = pg.time.get_ticks()
         self.boss.all_attack_boss.remove(self)
+        self.boss.damage(100)
 
     def mouv_attack(self, screen):
         if self.state == "grounded":
@@ -308,3 +318,69 @@ class GroundAttack(pg.sprite.Sprite):
             self.rect.y += self.speed
             if self.rect.y >= 700:  # Retour à la position initiale sous le sol
                 self.remouve()
+
+class Boss_second_phase(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.game = Game
+        self.pv = 500
+        self.pvmax = 900
+        self.attack = 1
+        boss_image = trouver_image('fire.png')
+        self.image = pg.image.load(boss_image)
+        self.image = pg.transform.scale(self.image, (500, 500))
+        self.rect = self.image.get_rect()
+        self.all_attack_boss = pg.sprite.Group()
+        self.rect.x = 820
+        self.rect.y = 200
+        self.last_attack_time = 0
+        self.attack_interval = 2
+        self.last_remove = pg.time.get_ticks()
+
+    def update_health_bar(self, surface):
+        # Affichage de la bar de vie
+        pygame.draw.rect(surface, (60, 63, 60), [400, 10, self.pvmax, 5])
+        pygame.draw.rect(surface, (210, 63, 60), [400, 10, self.pv, 5])
+
+    def damage(self, amount):
+        self.pv -= amount
+
+    def Attack_boss(self):
+        rand_attack = random.randint(0, 1) == 1
+        if rand_attack == 0:
+            self.all_attack_boss.add(GroundAttack(self))
+        if rand_attack == 1:
+            self.all_attack_boss.add(Attack1_boss(self))
+
+class Boss_third_phase(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.game = Game
+        self.pv = 500
+        self.pvmax = 900
+        self.attack = 1
+        boss_image = trouver_image('fire.png')
+        self.image = pg.image.load(boss_image)
+        self.image = pg.transform.scale(self.image, (500, 500))
+        self.rect = self.image.get_rect()
+        self.all_attack_boss = pg.sprite.Group()
+        self.rect.x = 820
+        self.rect.y = 200
+        self.last_attack_time = 0
+        self.attack_interval = 2
+        self.last_remove = pg.time.get_ticks()
+
+    def update_health_bar(self, surface):
+        # Affichage de la bar de vie
+        pygame.draw.rect(surface, (60, 63, 60), [400, 10, self.pvmax, 5])
+        pygame.draw.rect(surface, (210, 63, 60), [400, 10, self.pv, 5])
+
+    def damage(self, amount):
+        self.pv -= amount
+
+    def Attack_boss(self):
+        rand_attack = random.randint(0, 1) == 1
+        if rand_attack == 0:
+            self.all_attack_boss.add(GroundAttack(self))
+        if rand_attack == 1:
+            self.all_attack_boss.add(Attack1_boss(self))
