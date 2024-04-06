@@ -14,10 +14,10 @@ screen = pg.display.set_mode((reso_h, reso_l))
 background_path = trouver_image("GDG.jpg")
 background = pg.image.load(background_path)
 background = pg.transform.scale(background,(reso_h,reso_l))
-boss1 = Boss_first_phase()
+boss = Boss()
 start_cooldown = 4000
 boss_phase1_cooldown = 800
-last_attack_boss1 = pg.time.get_ticks()
+last_attack_boss = pg.time.get_ticks()
 background = pg.transform.scale(background, (reso_h, reso_l))
 
 # Chargement du jeu
@@ -175,7 +175,7 @@ while running:
     game.ground.afficher_sol(screen)
 
     # Mise à jour de la barre de vie du boss
-    game.boss1.update_health_bar(screen)
+    game.boss.update_health_bar(screen)
 
     # Affichage du héros
     screen.blit(game.hero.image, game.hero.rect)
@@ -186,34 +186,34 @@ while running:
 
     # Affichage du boss
     game.bosssprite.draw(screen)
-    if game.boss1.dead:
-        game.boss1.remove()
+    if game.boss.dead:
+        game.boss.remove()
         print("BOSSDE")
     time_now = pg.time.get_ticks()
     #Conditions pour l'apparition d'une nouvelle attaque
     #Première condition : attendre le délai au début du jeu pour pas que le joueur se fasse attaquer tout de suite
     #Deuxième condition : attendre qu'il n'y ai plus d'attaque pour en lancer une autre
-    if time_now - game.boss1.last_remove > start_cooldown + boss_phase1_cooldown and not game.boss1.all_attack_boss:
+    if time_now - game.boss.last_remove > start_cooldown + boss_phase1_cooldown and not game.boss.all_attack_boss:
         start_cooldown = 0
-        game.boss1.Attack_boss()
+        game.boss.Attack_boss()
 
     # Affichage de l'attaque du boss
-    game.boss1.all_attack_boss.draw(screen)
+    game.boss.all_attack_boss.draw(screen)
 
     # Boucle d'affichage du projectile
     for i in game.hero.all_attack:
         i.mouv_attack(screen)
-        if game.boss1.rect.colliderect(i.rect) and i.rect.x > game.boss1.rect.x + 80:
+        if game.boss.rect.colliderect(i.rect) and i.rect.x > game.boss.rect.x + 80:
             game.hero.all_attack.remove(i)
 
     for projectile in game.hero.all_trajectoire:
         projectile.move_trajectoire(screen)
-        if game.boss1.rect.colliderect(projectile.rect) and projectile.rect.x > game.boss1.rect.x + 100:
+        if game.boss.rect.colliderect(projectile.rect) and projectile.rect.x > game.boss.rect.x + 100:
             game.hero.all_trajectoire.remove(projectile)
             print("pos x =", projectile.rect.x)
 
     # Création et affichage des attaques du boss
-    for i in game.boss1.all_attack_boss:
+    for i in game.boss.all_attack_boss:
         i.mouv_attack(screen)
         if game.hero.rect.colliderect(i.rect):
             game.hero.get_degats = 5
@@ -251,7 +251,7 @@ while running:
         screen.blit(coeur_image, coeur_rect)
 
 
-    if game.hero.rect.colliderect(game.boss1.rect) and game.hero.rect.x > game.boss1.rect.x:
+    if game.hero.rect.colliderect(game.boss.rect) and game.hero.rect.x > game.boss.rect.x:
         game.hero.rect.x -= 150
         game.hero.get_degats = 5
         game.hero.pv -= game.hero.get_degats

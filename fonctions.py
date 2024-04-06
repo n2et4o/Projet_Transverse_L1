@@ -1,12 +1,15 @@
+import math
+import os
+import random
+import time
+
 import pygame as pg
 import pygame.sprite
-import math
+from pygame.sprite import Group
 
 pg.init()
 pg.joystick.init()  # Initialisation du système de joystick
-import os, time
-import os,time, math, random
-from pygame.sprite import Group
+
 
 reso_h = 1280
 reso_l = 720
@@ -38,6 +41,7 @@ class Animation(pg.sprite.Sprite):
         self.image_current = 0
         self.images = dict_animation.get("hero")
         self.animation = False
+
     def start_animation(self):
         self.animation = True
 
@@ -56,7 +60,7 @@ class Animation(pg.sprite.Sprite):
             if direction == -1:
                 self.image = pg.transform.flip(self.image, True, False)
 
-    def start_attack(self,go):
+    def start_attack(self, go):
         if go == True:
             first = self.image
             self.image = pg.image.load(at)
@@ -160,17 +164,16 @@ class Hero(Animation):
         # Couleur de la barre utilisant le code RGB (R,G,B)
         bar_color = (172, 255, 51)
         # Position de la barre de vie (x,y,width,height)
-        bar_position = [ 30,10 , self.pv + 7, 5]
+        bar_position = [30, 10, self.pv + 7, 5]
         pg.draw.rect(surface, bar_color, bar_position)
         #bar_position = [self.rect.x + 30, self.rect.y, self.pvmax, 5]
-
 
 
 
 class Game:
     def __init__(self):
         self.hero = Hero(self)
-        self.boss1 = Boss_first_phase()
+        self.boss = Boss()
         self.bosssprite = pg.sprite.Group()
         self.pressed = {}
         self.gravite = 10
@@ -185,13 +188,13 @@ class Game:
             pg.Rect(00, 450, 150, 40), pg.Rect(400, 450, 150, 40), pg.Rect(600, 250, 150, 40),
             pg.Rect(200, 250, 150, 40)
         ]
-        if self.boss1.pv > 0:
-            self.spawnboss1()
+        if self.boss.pv > 0:
+            self.spawnboss()
             print("spawnd")
 
-    def spawnboss1(self):
-        self.boss1 = Boss_first_phase()
-        self.bosssprite.add(self.boss1)
+    def spawnboss(self):
+        self.boss = Boss()
+        self.bosssprite.add(self.boss)
 
     def collision(self, sprite, Group):
         return pg.sprite.spritecollide(sprite, Group, False, sprite.collide_mask)
@@ -256,8 +259,9 @@ class Trajectoire_hero(pg.sprite.Sprite):
         self.rect.y = self.y_init - (self.vitesse * math.sin(self.angle) * temps_accelere - 0.5 * g * temps_accelere ** 2)
 
         if self.rect.x < 0 or self.rect.x > screen.get_width() or self.rect.y > screen.get_height():
-                self.remove_trajectoire()
-                #print("fire ball supprimé")
+            self.remove_trajectoire()
+            #print("fire ball supprimé")
+
 
 class Attack_hero(pg.sprite.Sprite):
     def __init__(self, hero):
@@ -270,10 +274,10 @@ class Attack_hero(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.y = hero.rect.y + 60
         self.direction = hero.direction
+
         if self.direction == -1:
             self.rect.x = hero.rect.x - 51
             self.image = pg.transform.flip(self.image, True, False)
-
         else:
             self.rect.x = hero.rect.x + 130
 
@@ -289,7 +293,6 @@ class Attack_hero(pg.sprite.Sprite):
         # Verification et suppression de l'attaque si celle-ci est en dehors de l'écran
         if self.rect.x > screen.get_width() or self.rect.x < 0:
             self.remouve()
-
 
 
 # Classe du Sol
@@ -311,7 +314,7 @@ class Ground_up(pg.sprite.Sprite):
         pg.draw.rect(surface, (51, 246, 255), self.rect)
 
 
-class Boss_first_phase(pg.sprite.Sprite):
+class Boss(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.game = Game
@@ -429,69 +432,3 @@ class GroundAttack(pg.sprite.Sprite):
             self.rect.y += self.speed
             if self.rect.y >= 700:  # Retour à la position initiale sous le sol
                 self.remouve()
-
-class Boss_second_phase(pg.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.game = Game
-        self.pv = 500
-        self.pvmax = 900
-        self.attack = 1
-        boss_image = trouver_image('fire.png')
-        self.image = pg.image.load(boss_image)
-        self.image = pg.transform.scale(self.image, (500, 500))
-        self.rect = self.image.get_rect()
-        self.all_attack_boss = pg.sprite.Group()
-        self.rect.x = 820
-        self.rect.y = 200
-        self.last_attack_time = 0
-        self.attack_interval = 2
-        self.last_remove = pg.time.get_ticks()
-
-    def update_health_bar(self, surface):
-        # Affichage de la bar de vie
-        pygame.draw.rect(surface, (60, 63, 60), [400, 10, self.pvmax, 5])
-        pygame.draw.rect(surface, (210, 63, 60), [400, 10, self.pv, 5])
-
-    def damage(self, amount):
-        self.pv -= amount
-
-    def Attack_boss(self):
-        rand_attack = random.randint(0, 1) == 1
-        if rand_attack == 0:
-            self.all_attack_boss.add(GroundAttack(self))
-        if rand_attack == 1:
-            self.all_attack_boss.add(Attack1_boss(self))
-
-class Boss_third_phase(pg.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.game = Game
-        self.pv = 500
-        self.pvmax = 900
-        self.attack = 1
-        boss_image = trouver_image('fire.png')
-        self.image = pg.image.load(boss_image)
-        self.image = pg.transform.scale(self.image, (500, 500))
-        self.rect = self.image.get_rect()
-        self.all_attack_boss = pg.sprite.Group()
-        self.rect.x = 820
-        self.rect.y = 200
-        self.last_attack_time = 0
-        self.attack_interval = 2
-        self.last_remove = pg.time.get_ticks()
-
-    def update_health_bar(self, surface):
-        # Affichage de la bar de vie
-        pygame.draw.rect(surface, (60, 63, 60), [400, 10, self.pvmax, 5])
-        pygame.draw.rect(surface, (210, 63, 60), [400, 10, self.pv, 5])
-
-    def damage(self, amount):
-        self.pv -= amount
-
-    def Attack_boss(self):
-        rand_attack = random.randint(0, 1) == 1
-        if rand_attack == 0:
-            self.all_attack_boss.add(GroundAttack(self))
-        if rand_attack == 1:
-            self.all_attack_boss.add(Attack1_boss(self))
