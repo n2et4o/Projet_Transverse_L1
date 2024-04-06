@@ -179,7 +179,7 @@ class Game:
         self.collision_ground = False
         self.rect_limite = pg.Rect(0, 0, 1280, 720)
         self.clock = pg.time.Clock()
-        self.fps = 600
+        self.fps = 60
         self.platform_group = Group()
         self.list_platform = [
             pg.Rect(00, 450, 150, 40), pg.Rect(400, 450, 150, 40), pg.Rect(600, 250, 150, 40),
@@ -409,7 +409,7 @@ class GroundAttack(pg.sprite.Sprite):
         if self.state == "grounded":
             # L'arme monte progressivement du sol
             current_time = time.time()
-            if current_time - self.last_show_time >= 1:
+            if current_time - self.last_show_time >= 0.5:
                 self.state = "up"
 
         elif self.state == "up":

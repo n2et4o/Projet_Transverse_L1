@@ -210,11 +210,17 @@ while running:
         projectile.move_trajectoire(screen)
         if game.boss1.rect.colliderect(projectile.rect) and projectile.rect.x > game.boss1.rect.x + 100:
             game.hero.all_trajectoire.remove(projectile)
-            print("pos x =",projectile.rect.x)
+            print("pos x =", projectile.rect.x)
 
-    # Création et affichage des plateformes
+    # Création et affichage des attaques du boss
     for i in game.boss1.all_attack_boss:
         i.mouv_attack(screen)
+        if game.hero.rect.colliderect(i.rect):
+            game.hero.get_degats = 5
+            game.hero.pv -= game.hero.get_degats
+            game.hero.get_degats = 0
+
+
 
     # Création et affichage du des platformes
     for rectangle in game.list_platform:
