@@ -195,7 +195,7 @@ while running:
     #Deuxième condition : attendre qu'il n'y ai plus d'attaque pour en lancer une autre
     if time_now - game.boss.last_remove > start_cooldown + boss_phase1_cooldown and not game.boss.all_attack_boss:
         start_cooldown = 0
-        game.boss.Attack_boss()
+        game.boss.Attack_boss(game.hero.rect.x, game.hero.rect.y)
 
     # Affichage de l'attaque du boss
     game.boss.all_attack_boss.draw(screen)
@@ -205,6 +205,7 @@ while running:
         i.mouv_attack(screen)
         if game.boss.rect.colliderect(i.rect) and i.rect.x > game.boss.rect.x + 80:
             game.hero.all_attack.remove(i)
+            game.boss.damage(10)
 
     for projectile in game.hero.all_trajectoire:
         projectile.move_trajectoire(screen)

@@ -318,7 +318,7 @@ class Boss(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.game = Game
-        self.pv = 100
+        self.pv = 500
         self.pvmax = 700
         self.attack = 1
         boss_image = trouver_image('mob.png')
@@ -335,8 +335,8 @@ class Boss(pg.sprite.Sprite):
 
     def update_health_bar(self, surface):
         # Affichage de la bar de vie
-        pygame.draw.rect(surface, (60, 63, 60), [400, 10, self.pvmax, 5])
-        pygame.draw.rect(surface, (210, 63, 60), [400, 10, self.pv, 5])
+        pygame.draw.rect(surface, (60, 63, 60), [300, 50, self.pvmax, 5])
+        pygame.draw.rect(surface, (210, 63, 60), [300, 50, self.pv, 5])
 
     def damage(self, amount):
         self.pv -= amount
@@ -347,15 +347,15 @@ class Boss(pg.sprite.Sprite):
             print(("bossde"))
             '''
 
-    def Attack_boss(self):
+    def Attack_boss(self, hero_x, hero_y):
         rand_attack = random.randint(0, 1) == 1
         if rand_attack == 0:
-            self.all_attack_boss.add(GroundAttack(self))
+            self.all_attack_boss.add(GroundAttack(self, hero_x, hero_y))
         if rand_attack == 1:
-            self.all_attack_boss.add(Attack1_boss(self))
+            self.all_attack_boss.add(Attack1_boss(self, hero_x, hero_y))
 
 class Attack1_boss(pg.sprite.Sprite):
-    def __init__(self, boss):
+    def __init__(self, boss, hero_x, hero_y):
         super(Attack1_boss, self).__init__()
         self.boss = boss
         projectile = trouver_image("fire.png")
@@ -363,12 +363,15 @@ class Attack1_boss(pg.sprite.Sprite):
         self.image = pg.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.x = boss.rect.x
-        self.rand_parameter = random.randint(0,1)
-        start_position = 150
+        self.rand_parameter = random.randint(0, 1)
+        self.rect.y = boss.rect.y
+        if self.rand_parameter == 1:
+            self.rect.y = hero_y + 25
+        self.up_or_down = random.choice([-1, 1])
+    ''' start_position = 150
         if self.rand_parameter == 1:
             start_position = random.choice([0, 150, 350])
-        self.rect.y = boss.rect.y + start_position
-        self.up_or_down = random.choice([-1, 1])
+        self.rect.y = boss.rect.y + start_position'''
 
 
     def remouve(self):
@@ -377,10 +380,11 @@ class Attack1_boss(pg.sprite.Sprite):
 
     def mouv_attack(self,screen):
         # Paramètres de la sinusoidale (vitesse_horizontale, amplitude, fréquence) pour faire des trajectoires intéréssantes
-        sinusoidal_parameters = [[7, 30, self.up_or_down * 0.01], [10, 30, self.up_or_down * 0.04]]
+        sinusoidal_parameters = [[7, 30, self.up_or_down * 0.01], [10, 30, self.up_or_down * 0.03]]
         self.vitesse_attack = sinusoidal_parameters[self.rand_parameter][0]
-        self.rect.x -= self.vitesse_attack + 0
+        self.rect.x -= self.vitesse_attack
         # Paramètres de la trajectoire sinusoidale
+        print(self.rand_parameter)
         amplitude = 30  # Amplitude de la sinusoidale
         frequence = 0.01  # Fréquence angulaire de la sinusoidale
         self.rect.y += sinusoidal_parameters[self.rand_parameter][1] * math.sin(sinusoidal_parameters[self.rand_parameter][2] * self.rect.x)
@@ -391,13 +395,14 @@ class Attack1_boss(pg.sprite.Sprite):
             self.remouve()
 
 class GroundAttack(pg.sprite.Sprite):
-    def __init__(self, boss):
+    def __init__(self, boss, hero_x, hero_y):
         super(GroundAttack, self).__init__()
         self.boss = boss
         projectile = trouver_image("fire_2.png")
         self.image = pg.image.load(projectile)
         self.rect = self.image.get_rect()
-        self.rect.x = boss.rect.x - random.choice([170, 370, 570])  # Positions initiales sous le sol
+      # self.rect.x = boss.rect.x - random.choice([170, 370, 570])
+        self.rect.x = hero_x + 50   # Positions initiales sous le sol
         self.rect.y = 650
         self.speed = 50
         self.state = "grounded"  # État initial : l'arme est cachée sous le sol
@@ -406,13 +411,12 @@ class GroundAttack(pg.sprite.Sprite):
     def remouve(self):
         self.boss.last_remove = pg.time.get_ticks()
         self.boss.all_attack_boss.remove(self)
-        self.boss.damage(100)
 
     def mouv_attack(self, screen):
         if self.state == "grounded":
             # L'arme monte progressivement du sol
             current_time = time.time()
-            if current_time - self.last_show_time >= 0.5:
+            if current_time - self.last_show_time >= 0.7:
                 self.state = "up"
 
         elif self.state == "up":
@@ -424,7 +428,7 @@ class GroundAttack(pg.sprite.Sprite):
         elif self.state == "waiting":
             # Attente avant de commencer à descendre
             current_time = time.time()
-            if current_time - self.last_show_time >= 2.5:
+            if current_time - self.last_show_time >= 2:
                 self.state = "down"
 
         elif self.state == "down":
