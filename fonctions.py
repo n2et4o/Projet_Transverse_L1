@@ -331,7 +331,9 @@ class Boss(pg.sprite.Sprite):
         self.last_attack_time = 0
         self.attack_interval = 2
         self.last_remove = pg.time.get_ticks()
-        self.dead = False
+        self.phase = 1
+        self.actif = True
+        self.cooldown = 800
 
     def update_health_bar(self, surface):
         # Affichage de la bar de vie
@@ -340,15 +342,13 @@ class Boss(pg.sprite.Sprite):
 
     def damage(self, amount):
         self.pv -= amount
-        '''
+        if self.pv <= self.pvmax / 2 and self.phase == 1:
+            self.phase = 2
         if self.pv <= 0:
-            self.dead = True
-            self.remove()
-            print(("bossde"))
-            '''
+            self.phase = 3
 
     def Attack_boss(self, hero_x, hero_y):
-        rand_attack = random.randint(0, 1) == 1
+        rand_attack = random.randint(0, 1)
         if rand_attack == 0:
             self.all_attack_boss.add(GroundAttack(self, hero_x, hero_y))
         if rand_attack == 1:
@@ -398,8 +398,9 @@ class GroundAttack(pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y):
         super(GroundAttack, self).__init__()
         self.boss = boss
-        projectile = trouver_image("fire_2.png")
-        self.image = pg.image.load(projectile)
+        queue = trouver_image("queue.png")
+        self.image = pg.image.load(queue)
+        self.image = pg.transform.scale(self.image, (150, 530))
         self.rect = self.image.get_rect()
       # self.rect.x = boss.rect.x - random.choice([170, 370, 570])
         self.rect.x = hero_x + 50   # Positions initiales sous le sol
@@ -414,15 +415,15 @@ class GroundAttack(pg.sprite.Sprite):
 
     def mouv_attack(self, screen):
         if self.state == "grounded":
-            # L'arme monte progressivement du sol
+            # La queue monte progressivement du sol
             current_time = time.time()
             if current_time - self.last_show_time >= 0.7:
                 self.state = "up"
 
         elif self.state == "up":
-            # L'arme sort complètement du sol
+            # La queue sort complètement du sol
             self.rect.y -= self.speed
-            if self.rect.y <= 170:  # Hauteur maximale atteinte par l'arme
+            if self.rect.y <= 200:  # Hauteur maximale atteinte par la queue
                 self.state = "waiting"
 
         elif self.state == "waiting":
@@ -432,7 +433,7 @@ class GroundAttack(pg.sprite.Sprite):
                 self.state = "down"
 
         elif self.state == "down":
-            # L'arme redescend lentement
+            # La queue redescend lentement
             self.rect.y += self.speed
-            if self.rect.y >= 700:  # Retour à la position initiale sous le sol
+            if self.rect.y >= 1000:
                 self.remouve()

@@ -14,11 +14,14 @@ screen = pg.display.set_mode((reso_h, reso_l))
 background_path = trouver_image("GDG.jpg")
 background = pg.image.load(background_path)
 background = pg.transform.scale(background,(reso_h,reso_l))
-boss = Boss()
-start_cooldown = 4000
-boss_phase1_cooldown = 800
-last_attack_boss = pg.time.get_ticks()
 background = pg.transform.scale(background, (reso_h, reso_l))
+boss = Boss()
+start_cooldown = 3000
+last_attack_boss = pg.time.get_ticks()
+# Variables permettant au héros d'avoir un peu d'invicibilité après s'être fait toucher
+invicibility_cooldown = 2000
+last_hit_hero = pg.time.get_ticks()
+
 
 # Chargement du jeu
 game = Game()
@@ -186,14 +189,11 @@ while running:
 
     # Affichage du boss
     game.bosssprite.draw(screen)
-    if game.boss.dead:
-        game.boss.remove()
-        print("BOSSDE")
     time_now = pg.time.get_ticks()
     #Conditions pour l'apparition d'une nouvelle attaque
     #Première condition : attendre le délai au début du jeu pour pas que le joueur se fasse attaquer tout de suite
     #Deuxième condition : attendre qu'il n'y ai plus d'attaque pour en lancer une autre
-    if time_now - game.boss.last_remove > start_cooldown + boss_phase1_cooldown and not game.boss.all_attack_boss:
+    if time_now - game.boss.last_remove > start_cooldown + game.boss.cooldown and not game.boss.all_attack_boss:
         start_cooldown = 0
         game.boss.Attack_boss(game.hero.rect.x, game.hero.rect.y)
 
@@ -205,21 +205,22 @@ while running:
         i.mouv_attack(screen)
         if game.boss.rect.colliderect(i.rect) and i.rect.x > game.boss.rect.x + 80:
             game.hero.all_attack.remove(i)
-            game.boss.damage(10)
+            game.boss.damage(5)
 
     for projectile in game.hero.all_trajectoire:
         projectile.move_trajectoire(screen)
         if game.boss.rect.colliderect(projectile.rect) and projectile.rect.x > game.boss.rect.x + 100:
             game.hero.all_trajectoire.remove(projectile)
-            print("pos x =", projectile.rect.x)
+            game.boss.damage(10)
 
     # Création et affichage des attaques du boss
     for i in game.boss.all_attack_boss:
         i.mouv_attack(screen)
-        if game.hero.rect.colliderect(i.rect):
-            game.hero.get_degats = 5
+        if game.hero.rect.colliderect(i.rect) and time_now - last_hit_hero > invicibility_cooldown:
+            game.hero.get_degats = 25
             game.hero.pv -= game.hero.get_degats
             game.hero.get_degats = 0
+            last_hit_hero = pg.time.get_ticks()
 
 
 
@@ -253,12 +254,12 @@ while running:
 
 
     if game.hero.rect.colliderect(game.boss.rect) and game.hero.rect.x > game.boss.rect.x:
-        game.hero.rect.x -= 150
-        game.hero.get_degats = 5
+        game.hero.rect.x -= 200
+        if time_now - last_hit_hero > invicibility_cooldown:
+            game.hero.get_degats = 25
+            last_hit_hero = pg.time.get_ticks()
         game.hero.pv -= game.hero.get_degats
         game.hero.get_degats = 0
-
-
 
 
 
@@ -276,3 +277,5 @@ while running:
 
 # Fermeture de Pygame
 pg.quit()
+
+
