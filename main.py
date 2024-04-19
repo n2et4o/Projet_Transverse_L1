@@ -11,9 +11,9 @@ pg.display.set_caption("Winter Grief")
 reso_h = 1280
 reso_l = 720
 screen = pg.display.set_mode((reso_h, reso_l))
-background_path = trouver_image("GDG.jpg")
+background_path = trouver_image("bg_2.png")
 background = pg.image.load(background_path)
-background = pg.transform.scale(background,(reso_h,reso_l))
+background = pg.transform.scale(background,(reso_h- 200,reso_l))
 boss1 = Boss_first_phase()
 start_cooldown = 4000
 boss_phase1_cooldown = 800
@@ -22,9 +22,11 @@ background = pg.transform.scale(background, (reso_h, reso_l))
 
 # Chargement du jeu
 game = Game()
-
+# Chemin d'accès des images du jeu
 at = trouver_image("hero's_attack.png")
 keur = trouver_image("keur.png")
+#bonous = trouver_image("GD.jpg")
+
 # Temps entre chaque attaque du hero
 temps_de_pause = 0.1
 
@@ -161,9 +163,8 @@ while running:
 
 
 
-
     # Test du delta_temps
-    # game.hero.deltas(game.hero.t1,game.hero.t2,game.hero.delta_temps)
+    game.hero.deltas(game.hero.t1,game.hero.t2,game.hero.delta_temps)
 
     # Application de gravite
     game.application_gravite()
@@ -197,6 +198,7 @@ while running:
         start_cooldown = 0
         game.boss1.Attack_boss()
 
+
     # Affichage de l'attaque du boss
     game.boss1.all_attack_boss.draw(screen)
 
@@ -216,7 +218,7 @@ while running:
     for i in game.boss1.all_attack_boss:
         i.mouv_attack(screen)
         if game.hero.rect.colliderect(i.rect):
-            game.hero.get_degats = 5
+            game.hero.get_degats = 1
             game.hero.pv -= game.hero.get_degats
             game.hero.get_degats = 0
 
@@ -243,7 +245,7 @@ while running:
         coeur_rect = coeur_image.get_rect(topleft=(0 + i * 30, 0))  # Changer la position pour chaque cœur
         screen.blit(coeur_image, coeur_rect)
 
-
+    # Permet la disparition totale des coeurs
     if (game.hero.pv > 0):
         coeur_image = pg.image.load(keur)
         coeur_image = pg.transform.scale(coeur_image, (70, 70))
@@ -253,13 +255,12 @@ while running:
 
     if game.hero.rect.colliderect(game.boss1.rect) and game.hero.rect.x > game.boss1.rect.x:
         game.hero.rect.x -= 150
-        game.hero.get_degats = 5
+        game.hero.get_degats = 25
         game.hero.pv -= game.hero.get_degats
         game.hero.get_degats = 0
-
-
-
-
+        if game.hero.pv <= 0:
+            game.hero.death()
+            game.hero.start_animation()
 
     # Mise à jour de la barre de vie
     game.hero.health_bar(screen)

@@ -1,6 +1,7 @@
 import pygame as pg
 import pygame.sprite
-import math
+import math,random
+
 
 pg.init()
 pg.joystick.init()  # Initialisation du système de joystick
@@ -29,32 +30,55 @@ def trouver_image(nom_image):
 
 run0 = trouver_image("run_0.png")
 at = trouver_image("hero's_attack.png")
+run1 = trouver_image("0.png")
 
 class Animation(pg.sprite.Sprite):
     def __init__(self, sprite_name):
         super().__init__()
-        self.image = pg.image.load(f'Image_du_jeu/{sprite_name}_items/run_0.png')
+        self.hero = Hero
+        self.image = pg.image.load(run1)
         self.image = pg.transform.scale(self.image, (150, 150))
         self.image_current = 0
-        self.images = dict_animation.get("hero")
+        self.images = dict_animation.get("walk")
         self.animation = False
+        self.dead = False
+
     def start_animation(self):
         self.animation = True
+    def death(self):
+        self.dead = True
 
     def animate(self, direction):
         # Verification de si l'animation est active
         if self.animation:
-            # Passer à l'image suivante
-            self.image_current += 1
-            # Vérification de la fin de l'animation
-            if self.image_current >= len(self.images):
-                # Revenir à l'image de départ
-                self.image_current = 0
-                self.animation = False
-            self.image = self.images[self.image_current]
-            self.image = pg.transform.scale(self.image, (150, 150))
-            if direction == -1:
-                self.image = pg.transform.flip(self.image, True, False)
+            # Vérification de la mort du heros et lancement de l'animation de mort
+            if self.dead == True:
+                self.images = dict_animation.get("death")
+                #self.dead = False
+                # Passer à l'image suivante
+                self.image_current += 1
+                # Vérification de la fin de l'animation
+                if self.image_current >= len(self.images):
+                    # Revenir à l'image de départ
+                    self.image_current = 24
+                    self.animation = False
+                self.image = self.images[self.image_current]
+                self.image = pg.transform.scale(self.image, (150, 150))
+                if direction == -1:
+                    self.image = pg.transform.flip(self.image, True, False)
+                #self.dead = False
+            else :
+                # Passer à l'image suivante
+                self.image_current += 1
+                # Vérification de la fin de l'animation
+                if self.image_current >= len(self.images):
+                    # Revenir à l'image de départ
+                    self.image_current = 0
+                    self.animation = False
+                self.image = self.images[self.image_current]
+                self.image = pg.transform.scale(self.image, (150, 150))
+                if direction == -1:
+                    self.image = pg.transform.flip(self.image, True, False)
 
     def start_attack(self,go):
         if go == True:
@@ -67,18 +91,33 @@ class Animation(pg.sprite.Sprite):
 def load_animate_image(sprite_name):
     # Charger les images
     images = []
-    path = f"Image_du_jeu/{sprite_name}_items/run_"
-    for num in range(0, 7):
-        images_path = path + str(num) + ".png"
-        images.append(pg.image.load(images_path))
+    if sprite_name == "death":
+        path = f"Image_du_jeu/{sprite_name}/"
+        for num in range(0, 25):
+            images_path = path + str(num) + ".png"
+            images.append(pg.image.load(images_path))
+    elif sprite_name == "walk":
+        path = f"Image_du_jeu/{sprite_name}/"
+        for num in range(0, 7):
+            images_path = path + str(num) + ".png"
+            images.append(pg.image.load(images_path))
+    else:
+        path = f"Image_du_jeu/{sprite_name}_items/run_"
+        for num in range(0, 7):
+            images_path = path + str(num) + ".png"
+            images.append(pg.image.load(images_path))
     return images
 
 dict_animation = {
-    "hero": load_animate_image("hero")
+    "hero": load_animate_image("hero"),
+    "death": load_animate_image("death"),
+    "walk": load_animate_image("walk")
 }
+
 
 # Class du hero
 class Hero(Animation):
+
     def __init__(self, Game):
         super().__init__('hero')
         self.game = Game
@@ -210,7 +249,6 @@ class Game:
                 self.hero.jumpe()
         if self.hero.rect.y < 0:
             self.hero.rect.y = 0
-
 
 class Trajectoire_hero(pg.sprite.Sprite):
     def __init__(self, hero):
