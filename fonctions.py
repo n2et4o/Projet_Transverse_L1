@@ -203,7 +203,7 @@ class Hero(Animation):
         # Couleur de la barre utilisant le code RGB (R,G,B)
         bar_color = (172, 255, 51)
         # Position de la barre de vie (x,y,width,height)
-        bar_position = [ 30,10 , self.pv + 7, 5]
+        bar_position = [ 30,5 , self.pv, 5]
         pg.draw.rect(surface, bar_color, bar_position)
         #bar_position = [self.rect.x + 30, self.rect.y, self.pvmax, 5]
 

@@ -1,3 +1,5 @@
+import time
+
 import pygame as pg
 from pygame import Surface, SurfaceType
 from fonctions import *
@@ -11,8 +13,8 @@ pg.display.set_caption("Winter Grief")
 reso_h = 1280
 reso_l = 720
 screen = pg.display.set_mode((reso_h, reso_l))
-#background_path = trouver_image("GDG.jpg")
-background = pg.image.load("Image_du_jeu/GDG.jpg")
+background_path = trouver_image("bg_2.png")
+background = pg.image.load(background_path)
 background = pg.transform.scale(background,(reso_h,reso_l))
 background = pg.transform.scale(background, (reso_h, reso_l))
 boss = Boss()
@@ -218,6 +220,7 @@ while running:
         i.mouv_attack(screen)
         if game.hero.rect.colliderect(i.rect) and time_now - last_hit_hero > invicibility_cooldown:
             game.hero.get_degats = 25
+
             game.hero.pv -= game.hero.get_degats
             game.hero.get_degats = 0
             last_hit_hero = pg.time.get_ticks()
@@ -254,11 +257,9 @@ while running:
         game.hero.pv -= game.hero.get_degats
         game.hero.get_degats = 0
 
-
-
-        if game.hero.pv <= 0:
-            game.hero.death()
-            game.hero.start_animation()
+    if game.hero.pv <= 0:
+        game.hero.death()
+        game.hero.start_animation()
 
     # Mise à jour de la barre de vie
     game.hero.health_bar(screen)
