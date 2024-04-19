@@ -11,22 +11,23 @@ pg.display.set_caption("Winter Grief")
 reso_h = 1280
 reso_l = 720
 screen = pg.display.set_mode((reso_h, reso_l))
-background_path = trouver_image("bg_2.png")
-background = pg.image.load(background_path)
-background = pg.transform.scale(background,(reso_h- 200,reso_l))
-boss1 = Boss_first_phase()
-start_cooldown = 4000
-boss_phase1_cooldown = 800
-last_attack_boss1 = pg.time.get_ticks()
+#background_path = trouver_image("GDG.jpg")
+background = pg.image.load("Image_du_jeu/GDG.jpg")
+background = pg.transform.scale(background,(reso_h,reso_l))
 background = pg.transform.scale(background, (reso_h, reso_l))
+boss = Boss()
+start_cooldown = 3000
+last_attack_boss = pg.time.get_ticks()
+# Variables permettant au héros d'avoir un peu d'invicibilité après s'être fait toucher
+invicibility_cooldown = 2000
+last_hit_hero = pg.time.get_ticks()
+
 
 # Chargement du jeu
 game = Game()
-# Chemin d'accès des images du jeu
+
 at = trouver_image("hero's_attack.png")
 keur = trouver_image("keur.png")
-#bonous = trouver_image("GD.jpg")
-
 # Temps entre chaque attaque du hero
 temps_de_pause = 0.1
 
@@ -163,8 +164,9 @@ while running:
 
 
 
+
     # Test du delta_temps
-    game.hero.deltas(game.hero.t1,game.hero.t2,game.hero.delta_temps)
+    # game.hero.deltas(game.hero.t1,game.hero.t2,game.hero.delta_temps)
 
     # Application de gravite
     game.application_gravite()
@@ -176,7 +178,7 @@ while running:
     game.ground.afficher_sol(screen)
 
     # Mise à jour de la barre de vie du boss
-    game.boss1.update_health_bar(screen)
+    game.boss.update_health_bar(screen)
 
     # Affichage du héros
     screen.blit(game.hero.image, game.hero.rect)
@@ -187,40 +189,38 @@ while running:
 
     # Affichage du boss
     game.bosssprite.draw(screen)
-    if game.boss1.dead:
-        game.boss1.remove()
-        print("BOSSDE")
     time_now = pg.time.get_ticks()
     #Conditions pour l'apparition d'une nouvelle attaque
     #Première condition : attendre le délai au début du jeu pour pas que le joueur se fasse attaquer tout de suite
     #Deuxième condition : attendre qu'il n'y ai plus d'attaque pour en lancer une autre
-    if time_now - game.boss1.last_remove > start_cooldown + boss_phase1_cooldown and not game.boss1.all_attack_boss:
+    if time_now - game.boss.last_remove > start_cooldown + game.boss.cooldown and not game.boss.all_attack_boss:
         start_cooldown = 0
-        game.boss1.Attack_boss()
+        game.boss.Attack_boss(game.hero.rect.x, game.hero.rect.y)
 
+    # Affichage des attaques du boss
+    game.boss.all_attack_boss.draw(screen)
 
-    # Affichage de l'attaque du boss
-    game.boss1.all_attack_boss.draw(screen)
-
-    # Boucle d'affichage du projectile
+    # Boucle d'affichage des projectiles
     for i in game.hero.all_attack:
         i.mouv_attack(screen)
-        if game.boss1.rect.colliderect(i.rect) and i.rect.x > game.boss1.rect.x + 80:
+        if game.boss.rect.colliderect(i.rect) and i.rect.x > game.boss.rect.x + 80:
             game.hero.all_attack.remove(i)
+            game.boss.damage(5)
 
     for projectile in game.hero.all_trajectoire:
         projectile.move_trajectoire(screen)
-        if game.boss1.rect.colliderect(projectile.rect) and projectile.rect.x > game.boss1.rect.x + 100:
+        if game.boss.rect.colliderect(projectile.rect) and projectile.rect.x > game.boss.rect.x + 100:
             game.hero.all_trajectoire.remove(projectile)
-            print("pos x =", projectile.rect.x)
+            game.boss.damage(10)
 
     # Création et affichage des attaques du boss
-    for i in game.boss1.all_attack_boss:
+    for i in game.boss.all_attack_boss:
         i.mouv_attack(screen)
-        if game.hero.rect.colliderect(i.rect):
-            game.hero.get_degats = 1
+        if game.hero.rect.colliderect(i.rect) and time_now - last_hit_hero > invicibility_cooldown:
+            game.hero.get_degats = 25
             game.hero.pv -= game.hero.get_degats
             game.hero.get_degats = 0
+            last_hit_hero = pg.time.get_ticks()
 
 
 
@@ -242,22 +242,20 @@ while running:
         # Supposons que vous avez une image de cœur chargée et prête à être utilisée
         coeur_image = pg.image.load(keur)
         coeur_image = pg.transform.scale(coeur_image,(70,70))
-        coeur_rect = coeur_image.get_rect(topleft=(0 + i * 30, 0))  # Changer la position pour chaque cœur
-        screen.blit(coeur_image, coeur_rect)
-
-    # Permet la disparition totale des coeurs
-    if (game.hero.pv > 0):
-        coeur_image = pg.image.load(keur)
-        coeur_image = pg.transform.scale(coeur_image, (70, 70))
-        coeur_rect = coeur_image.get_rect(topleft=(0 + 0 * 30, 0))  # Changer la position pour chaque cœur
+        coeur_rect = coeur_image.get_rect(topleft=(0 + i * 30, -10))  # Changer la position pour chaque cœur
         screen.blit(coeur_image, coeur_rect)
 
 
-    if game.hero.rect.colliderect(game.boss1.rect) and game.hero.rect.x > game.boss1.rect.x:
-        game.hero.rect.x -= 150
-        game.hero.get_degats = 25
+    if game.hero.rect.colliderect(game.boss.rect) and game.hero.rect.x > game.boss.rect.x:
+        game.hero.rect.x -= 200
+        if time_now - last_hit_hero > invicibility_cooldown:
+            game.hero.get_degats = 25
+            last_hit_hero = pg.time.get_ticks()
         game.hero.pv -= game.hero.get_degats
         game.hero.get_degats = 0
+
+
+
         if game.hero.pv <= 0:
             game.hero.death()
             game.hero.start_animation()
