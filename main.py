@@ -11,8 +11,8 @@ pg.display.set_caption("Winter Grief")
 reso_h = 1280
 reso_l = 720
 screen = pg.display.set_mode((reso_h, reso_l))
-background_path = trouver_image("GDG.jpg")
-background = pg.image.load(background_path)
+#background_path = trouver_image("GDG.jpg")
+background = pg.image.load("Image_du_jeu/GDG.jpg")
 background = pg.transform.scale(background,(reso_h,reso_l))
 background = pg.transform.scale(background, (reso_h, reso_l))
 boss = Boss()
@@ -26,8 +26,8 @@ last_hit_hero = pg.time.get_ticks()
 # Chargement du jeu
 game = Game()
 
-at = trouver_image("hero's_attack.png")
-keur = trouver_image("keur.png")
+#at = trouver_image("hero's_attack.png")
+#keur = trouver_image("keur.png")
 # Temps entre chaque attaque du hero
 temps_de_pause = 0.1
 
@@ -57,7 +57,7 @@ while running:
             # Pression sur la touche 'a' pour réaliser une attaque
             if game.pressed.get(pg.K_a) and game.hero.can_attack(temps_de_pause):
                 first = game.hero.image
-                game.hero.image = pg.image.load(at)
+                game.hero.image = pg.image.load("Image_du_jeu/hero's_attack.png")
                 game.hero.image = pg.transform.scale(game.hero.image, (150, 150))
                 game.hero.Attack()
                 if game.hero.delta_temps >= 2:
@@ -109,7 +109,7 @@ while running:
 
             if joystick.get_button(2) and game.hero.can_attack(temps_de_pause):  # Supposons que le bouton 2 soit le bouton "Carré"
                 first = game.hero.image
-                game.hero.image = pg.image.load(at)
+                game.hero.image = pg.image.load("Image_du_jeu/hero's_attack.png")
                 game.hero.image = pg.transform.scale(game.hero.image, (150, 150))
                 game.hero.Attack()
                 if game.hero.delta_temps >= 2:
@@ -197,10 +197,10 @@ while running:
         start_cooldown = 0
         game.boss.Attack_boss(game.hero.rect.x, game.hero.rect.y)
 
-    # Affichage de l'attaque du boss
+    # Affichage des attaques du boss
     game.boss.all_attack_boss.draw(screen)
 
-    # Boucle d'affichage du projectile
+    # Boucle d'affichage des projectiles
     for i in game.hero.all_attack:
         i.mouv_attack(screen)
         if game.boss.rect.colliderect(i.rect) and i.rect.x > game.boss.rect.x + 80:
@@ -240,16 +240,9 @@ while running:
     # Ensuite, dans votre boucle principale, affichez les cœurs en fonction des PV du héros
     for i in range(game.hero.nombre_coeurs()):
         # Supposons que vous avez une image de cœur chargée et prête à être utilisée
-        coeur_image = pg.image.load(keur)
+        coeur_image = pg.image.load("Image_du_jeu/keur.png")
         coeur_image = pg.transform.scale(coeur_image,(70,70))
-        coeur_rect = coeur_image.get_rect(topleft=(0 + i * 30, 0))  # Changer la position pour chaque cœur
-        screen.blit(coeur_image, coeur_rect)
-
-
-    if (game.hero.pv > 0):
-        coeur_image = pg.image.load(keur)
-        coeur_image = pg.transform.scale(coeur_image, (70, 70))
-        coeur_rect = coeur_image.get_rect(topleft=(0 + 0 * 30, 0))  # Changer la position pour chaque cœur
+        coeur_rect = coeur_image.get_rect(topleft=(0 + i * 30, -10))  # Changer la position pour chaque cœur
         screen.blit(coeur_image, coeur_rect)
 
 
@@ -279,3 +272,26 @@ while running:
 pg.quit()
 
 
+'''
+LISTE A FAIRE:
+    Général:
+        - la vitesse du jeu qui change au cours du temps (réglé mais retrouver des valeur pour les sinusoidales)
+        - scène d'intro
+        - scène de game over/win
+        - warning rgb (ne vient pas des fonction draw et blit)
+    Les attaques: 
+        - les stalactites (fait)
+        - les lances
+        - gaster blaster
+        - boules explosives qui lancent d'autres boules de glaces
+    Le heros:
+        - animation d'invincibilité
+        - rechanger le model
+        - animation de mort
+        - régler les attaques en boucle
+        - enlever la barre de vie (fait)
+    Le boss:
+        - les animations de changement de phase
+        - animation standing
+        - mieux définir quand il peut attaquer
+'''
