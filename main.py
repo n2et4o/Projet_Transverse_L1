@@ -19,7 +19,11 @@ background = pg.transform.scale(background,(reso_h,reso_l))
 background = pg.transform.scale(background, (reso_h, reso_l))
 boss = Boss()
 start_cooldown = 3000
+fake_death_cooldown = 4000
+last_phase_cooldown = 2500
 last_attack_boss = pg.time.get_ticks()
+last_attack_hero = 0
+hero_attack_cooldown = 250
 # Variables permettant au héros d'avoir un peu d'invicibilité après s'être fait toucher
 invicibility_cooldown = 2000
 last_hit_hero = pg.time.get_ticks()
@@ -46,6 +50,8 @@ else:
 # Boucle du jeu
 running = True
 while running:
+
+    time_now = pg.time.get_ticks()
     # Initilisation de t1
     game.hero.t1 = time.time()
     for event in pg.event.get():
@@ -57,11 +63,12 @@ while running:
             game.pressed[event.key] = True
 
             # Pression sur la touche 'a' pour réaliser une attaque
-            if game.pressed.get(pg.K_a) and game.hero.can_attack(temps_de_pause):
+            if game.pressed.get(pg.K_a) and time_now - last_attack_hero > hero_attack_cooldown:
                 first = game.hero.image
                 game.hero.image = pg.image.load(at)
                 game.hero.image = pg.transform.scale(game.hero.image, (150, 150))
                 game.hero.Attack()
+                last_attack_hero = pg.time.get_ticks()
                 if game.hero.delta_temps >= 2:
                     game.hero.image = first
 
@@ -75,13 +82,13 @@ while running:
                 game.hero.t2 = time.time()  # Mise à jour de t2 après l'attaque
                 #print(" delta = ", game.hero.delta_temps)
 
-            # Pression sur la touche 't' pour réaliser une attaque parabolique
-            if event.key == pg.K_e and game.hero.can_attack(temps_de_pause):
+            # Pression sur la touche 'e' pour réaliser une attaque parabolique
+            if event.key == pg.K_e and game.hero.can_attack(temps_de_pause) and time_now - last_attack_hero > hero_attack_cooldown:
                 #print("Touche T pressée")
                 try:
                     nouveau_projectile = Trajectoire_hero(game.hero)
                     game.hero.all_trajectoire.add(nouveau_projectile)
-                    game.hero.t2 = time.time()  # Mise à jour de t2 après l'attaque
+                    last_attack_hero = pg.time.get_ticks()
                     #print("Projectile ajouté avec succès")
                 except Exception as e:
                     print(f"Erreur lors de l'ajout du projectile: {e}")
@@ -109,7 +116,7 @@ while running:
                 if game.hero.rect.y == 0:
                     game.hero.jumped = False
 
-            if joystick.get_button(2) and game.hero.can_attack(temps_de_pause):  # Supposons que le bouton 2 soit le bouton "Carré"
+            if joystick.get_button(2) and time_now - last_attack_hero > hero_attack_cooldown:  # Supposons que le bouton 2 soit le bouton "Carré"
                 first = game.hero.image
                 game.hero.image = pg.image.load(at)
                 game.hero.image = pg.transform.scale(game.hero.image, (150, 150))
@@ -123,10 +130,9 @@ while running:
                     if game.hero.delta_temps >= 2:
                         game.hero.image = first
 
-            if joystick.get_button(1) and game.hero.can_attack(temps_de_pause):  # Supposons que le bouton 1 soit le bouton "Cercle"
+            if joystick.get_button(1) and time_now - last_attack_hero > hero_attack_cooldown:  # Supposons que le bouton 1 soit le bouton "Cercle"
                 nouveau_projectile = Trajectoire_hero(game.hero)
                 game.hero.all_trajectoire.add(nouveau_projectile)
-                game.hero.t2 = time.time()  # Mise à jour de t2 après l'attaque
             # Vers le bas
             if joystick.get_button(12) > 0.1 and game.hero.rect.y <= 500:
                 game.resistance = 0
@@ -166,10 +172,6 @@ while running:
 
 
 
-
-    # Test du delta_temps
-    # game.hero.deltas(game.hero.t1,game.hero.t2,game.hero.delta_temps)
-
     # Application de gravite
     game.application_gravite()
 
@@ -179,8 +181,9 @@ while running:
     # Affichage du sol
     game.ground.afficher_sol(screen)
 
-    # Mise à jour de la barre de vie du boss
-    game.boss.update_health_bar(screen)
+    # Mise à jour de la barre de vie du boss et de sa phase
+    game.boss.update(screen, game.boss.phase)
+
 
     # Affichage du héros
     screen.blit(game.hero.image, game.hero.rect)
@@ -190,30 +193,64 @@ while running:
     game.hero.all_trajectoire.draw(screen)
 
     # Affichage du boss
-    game.bosssprite.draw(screen)
-    time_now = pg.time.get_ticks()
+    screen.blit(game.boss.image, game.boss.rect)
     #Conditions pour l'apparition d'une nouvelle attaque
     #Première condition : attendre le délai au début du jeu pour pas que le joueur se fasse attaquer tout de suite
     #Deuxième condition : attendre qu'il n'y ai plus d'attaque pour en lancer une autre
-    if time_now - game.boss.last_remove > start_cooldown + game.boss.cooldown and not game.boss.all_attack_boss:
+    if time_now - game.boss.last_remove > start_cooldown + game.boss.cooldown and not game.boss.all_attack_boss and game.boss.phase != 3:
         start_cooldown = 0
         game.boss.Attack_boss(game.hero.rect.x, game.hero.rect.y)
 
+    if time_now - last_attack_boss > last_phase_cooldown - 500 + start_cooldown and game.boss.phase == 3:
+        game.boss.phase = 35
+
+    if time_now - last_attack_boss > last_phase_cooldown + start_cooldown and game.boss.phase == 35:
+        game.boss.Attack_boss(game.hero.rect.x, game.hero.rect.y)
+        last_attack_boss = pg.time.get_ticks()
+        start_cooldown = 0
+
+
+
     # Affichage des attaques du boss
     game.boss.all_attack_boss.draw(screen)
+
+    # Changements de phases
+    if game.boss.change_phase != 0:
+        game.boss.phase = game.boss.change_phase
+        game.boss.change_phase = 0
+
+    if game.boss.pv < game.boss.pvmax / 2 and 1 == game.boss.phase:
+        game.boss.phase = 15
+        boss_phase = game.boss.phase
+
+    if game.boss.pv <= 0 and game.boss.phase == 2:
+        game.boss.phase = 245
+
+    if time_now - game.boss.fake_death_beggining > fake_death_cooldown and game.boss.phase == 246:
+        game.boss.phase = 25
+        start_cooldown = 3000
+
+    if 3 < game.boss.phase < 35 or game.boss.phase > 35:
+        game.boss.active = False
+    else:
+        game.boss.active = True
+
+    if game.boss.phase == 25 and game.boss.pv < 1000:
+        game.boss.pv += 11
+
 
     # Boucle d'affichage des projectiles
     for i in game.hero.all_attack:
         i.mouv_attack(screen)
         if game.boss.rect.colliderect(i.rect) and i.rect.x > game.boss.rect.x + 80:
             game.hero.all_attack.remove(i)
-            game.boss.damage(5)
+            game.boss.damage(game.hero.attack/3)
 
     for projectile in game.hero.all_trajectoire:
         projectile.move_trajectoire(screen)
         if game.boss.rect.colliderect(projectile.rect) and projectile.rect.x > game.boss.rect.x + 100:
             game.hero.all_trajectoire.remove(projectile)
-            game.boss.damage(10)
+            game.boss.damage(game.hero.attack)
 
     # Création et affichage des attaques du boss
     for i in game.boss.all_attack_boss:
@@ -271,7 +308,7 @@ while running:
     # Mise à jour de l'affichage
     pg.display.flip()
 
-    clock.tick(60)
+    clock.tick(30)
 
 # Fermeture de Pygame
 pg.quit()
