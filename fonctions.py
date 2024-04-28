@@ -66,11 +66,17 @@ class Animatesprite(pg.sprite.Sprite):
             self.boss_phase = self.new_phase
             self.images = dict_animation_boss.get(str(self.boss.phase))
         self.counter += 1
-        if self.counter % 5 == 0 and self.boss.phase != 35 and self.boss.phase != 245:
+        if self.counter % 5 == 0 and self.boss.phase < 15:
             self.image_current += 1
-        if self.boss.phase == 35:
+        if self.counter % 3 == 0 and self.boss.phase == 15:
             self.image_current += 1
-        if self.counter % 10 == 0 and self.boss.phase == 245:
+        if self.counter % 3 == 0 and self.boss.phase == 25:
+            self.image_current += 1
+        if self.counter % 2 == 0 and self.boss.phase == 35:
+            self.image_current += 1
+        if self.counter % 8 == 0 and self.boss.phase == 245:
+            self.image_current += 1
+        if self.counter % 5 == 0 and self.boss.phase == 246:
             self.image_current += 1
 
         # Vérification de la fin de l'animation
@@ -324,7 +330,7 @@ class Hero(Animation):
         bar_color = (172, 255, 51)
         # Position de la barre de vie (x,y,width,height)
         bar_position = [30, 5, self.pv, 5]
-        pg.draw.rect(surface, bar_color, bar_position)
+        #pg.draw.rect(surface, bar_color, bar_position)
         #bar_position = [self.rect.x + 30, self.rect.y, self.pvmax, 5]
 
 
@@ -484,7 +490,7 @@ class Boss(Animatesprite):
         self.last_remove = pg.time.get_ticks()
         self.phase = boss_phase
         self.change_phase = 0
-        self.cooldown = 500
+        self.cooldown = 2800
         self.active = True
         self.fake_death_beggining = 0
 
