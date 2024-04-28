@@ -100,9 +100,6 @@ class Animatesprite(pg.sprite.Sprite):
         else:
             self.image = pg.transform.scale(self.image, (400, 650))
 
-        print(self.boss.phase)
-        print(self.boss_phase)
-
 
 def load_animate_image_boss(sprite_name, phase):
     # Charger les images
@@ -572,7 +569,6 @@ class Attack1_boss(pg.sprite.Sprite):
         self.vitesse_attack = sinusoidal_parameters[self.rand_parameter][0]
         self.rect.x -= self.vitesse_attack
         # Paramètres de la trajectoire sinusoidale
-        print(self.rand_parameter)
         amplitude = 30  # Amplitude de la sinusoidale
         frequence = 0.01  # Fréquence angulaire de la sinusoidale
         self.rect.y += sinusoidal_parameters[self.rand_parameter][1] * math.sin(sinusoidal_parameters[self.rand_parameter][2] * self.rect.x)
