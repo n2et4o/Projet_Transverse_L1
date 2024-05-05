@@ -222,9 +222,10 @@ while running:
         game.boss.active = True
 
     if game.boss.phase == 25 and game.boss.pv < 1000:
-        game.boss.pv += 15
+        game.boss.pv += 25
 
-
+    if game.boss.phase == 1 and start_cooldown == 0:
+        game.boss.active = True
     #Conditions pour l'apparition d'une nouvelle attaque
     #Première condition : attendre le délai au début du jeu pour pas que le joueur se fasse attaquer tout de suite
     #Deuxième condition : attendre qu'il n'y ai plus d'attaque pour en lancer une autre

@@ -68,15 +68,15 @@ class Animatesprite(pg.sprite.Sprite):
         self.counter += 1
         if self.counter % 5 == 0 and self.boss.phase < 15:
             self.image_current += 1
-        if self.counter % 3 == 0 and self.boss.phase == 15:
+        if self.counter % 2 == 0 and self.boss.phase == 15:
             self.image_current += 1
-        if self.counter % 3 == 0 and self.boss.phase == 25:
+        if self.counter % 2 == 0 and self.boss.phase == 25:
             self.image_current += 1
         if self.counter % 2 == 0 and self.boss.phase == 35:
             self.image_current += 1
         if self.counter % 8 == 0 and self.boss.phase == 245:
             self.image_current += 1
-        if self.counter % 5 == 0 and self.boss.phase == 246:
+        if self.counter % 4 == 0 and self.boss.phase == 246:
             self.image_current += 1
 
         # Vérification de la fin de l'animation
@@ -490,8 +490,8 @@ class Boss(Animatesprite):
         self.last_remove = pg.time.get_ticks()
         self.phase = boss_phase
         self.change_phase = 0
-        self.cooldown = 2800
-        self.active = True
+        self.cooldown = 2700
+        self.active = False
         self.fake_death_beggining = 0
 
     def update(self, surface, phase):
@@ -542,12 +542,12 @@ class Boss(Animatesprite):
                         self.all_attack_boss.add(Lances_down(self, hero_x, hero_y, i))
 
 
-attack1_boss = pg.image.load("Image_du_jeu/fire.png")
+ice_ball = pg.image.load("Image_du_jeu/ice_ball0.png")
 class Attack1_boss(pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y):
         super(Attack1_boss, self).__init__()
         self.boss = boss
-        self.image = attack1_boss
+        self.image = ice_ball
         self.image = pg.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.x = boss.rect.x
@@ -629,13 +629,13 @@ class GroundAttack(pg.sprite.Sprite):
             if self.rect.y >= 1000:
                 self.remouve()
 
-stalactite = pg.image.load("Image_du_jeu/fire.png")
+stalactite = pg.image.load("Image_du_jeu/stalactite.png")
 class Stalactite (pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y):
         super(Stalactite, self).__init__()
         self.boss = boss
         self.image = stalactite
-        self.image = pg.transform.scale(self.image, (50, 50))
+        self.image = pg.transform.scale(self.image, (30, 100))
         self.rect = self.image.get_rect()
         self.rect.x = random.choice([150, 400, 650])
         self.rect.y = random.randint(-500, 0)
@@ -651,13 +651,13 @@ class Stalactite (pg.sprite.Sprite):
         if self.rect.y > 900:
             self.remouve()
 
-lances_down = pg.image.load("Image_du_jeu/mob/phase_3/mob3_1.png")
+lances_down = pg.image.load("Image_du_jeu/spear/spear_final.png")
 class Lances_down (pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y, n):
         super(Lances_down, self).__init__()
         self.boss = boss
         self.image = lances_down
-        self.image = pg.transform.scale(self.image, (90, 200))
+        self.image = pg.transform.scale(self.image, (75, 250))
         self.rect = self.image.get_rect()
         positions = [0, 150, 300, 450, 600, 750, 900]
         self.rect.x = positions[n]
@@ -681,13 +681,13 @@ class Lances_down (pg.sprite.Sprite):
             if self.rect.y > 900:
                 self.remouve()
 
-lances_side = pg.image.load("Image_du_jeu/fire_2.png")
+lances_side = pg.image.load("Image_du_jeu/spear_side/spear_final.png")
 class Lances_side (pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y, n):
         super(Lances_side, self).__init__()
         self.boss = boss
         self.image = lances_side
-        self.image = pg.transform.scale(self.image, (200, 90))
+        self.image = pg.transform.scale(self.image, (250, 75))
         self.rect = self.image.get_rect()
         positions = [-20, 150, 320, 490, 660]
         self.rect.x = boss.rect.x
@@ -715,7 +715,7 @@ class Ice_work (pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y):
         super(Ice_work, self).__init__()
         self.boss = boss
-        self.image = lances_side
+        self.image = ice_ball
         self.image = pg.transform.scale(self.image, (100, 100))
         self.rect = self.image.get_rect()
         self.rect.x = boss.rect.x
@@ -743,7 +743,7 @@ class Ice_ball (pg.sprite.Sprite):
     def __init__(self, boss, n, position, cross):
         super(Ice_ball, self).__init__()
         self.boss = boss
-        self.image = stalactite
+        self.image = ice_ball
         self.image = pg.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.x = 400
