@@ -29,82 +29,56 @@ def trouver_image(nom_image):
     # Si l'image n'est pas trouvée, retourner None
     return None
 
+class Sound():
+    def __init__(self):
+        self.theme = pg.mixer_music.load("Musiques_et_sons/Musique.wav")
+        self.theme_volume = pg.mixer_music.set_volume(0.5)
+        self.theme = pg.mixer_music.play(-1, fade_ms=40000)
+        self.death = pg.mixer.Sound("Musiques_et_sons/death.wav")
+        self.attack = pg.mixer.Sound("Musiques_et_sons/boule_de_feu_lancement.wav")
+        self.up = pg.mixer.Sound("Musiques_et_sons/pop.wav")
+sound = Sound()
 
 run0 = trouver_image("run_0.png")
-at = trouver_image("hero's_attack.png")
+at = trouver_image("hero_attack.png")
 run1 = trouver_image("0.png")
+keur = trouver_image("keur.png")
 fps_factor = 2
 boss_phase = 1
 counter_animation = 0
 
+lances_side = pg.image.load("Image_du_jeu/spear_side/spear_final.png")
+ice_ball = pg.image.load("Image_du_jeu/ice_ball0.png")
+groundattack = pg.image.load("Image_du_jeu/queue.png")
+stalactite = pg.image.load("Image_du_jeu/stalactite.png")
+lances_down = pg.image.load("Image_du_jeu/spear/spear_final.png")
 
-class Animatesprite(pg.sprite.Sprite):
-    def __init__(self, sprite_name):
-        super().__init__()
-        self.boss = Boss
-        self.image = pg.image.load(f'Image_du_jeu/{sprite_name}.png')
-        self.image = pg.transform.scale(self.image, (300, 500))
-        self.image_current = 0
-        self.boss_phase = boss_phase
-        self.images = dict_animation_boss.get(str(self.boss_phase))
-        self.animation = False
-        self.dead = False
-        self.counter = 0
+def load_animate_image(sprite_name):
+    # Charger les images
+    images = []
+    if sprite_name == "death":
+        path = f"Image_du_jeu/{sprite_name}/"
+        for num in range(0, 25):
+            images_path = path + str(num) + ".png"
+            images.append(pg.image.load(images_path))
+    elif sprite_name == "walk":
+        path = f"Image_du_jeu/{sprite_name}/"
+        for num in range(0, 7):
+            images_path = path + str(num) + ".png"
+            images.append(pg.image.load(images_path))
+    else:
+        path = f"Image_du_jeu/{sprite_name}_items/run_"
+        for num in range(0, 7):
+            images_path = path + str(num) + ".png"
+            images.append(pg.image.load(images_path))
+    return images
 
+dict_animation = {
+    "hero": load_animate_image("hero"),
+    "death": load_animate_image("death"),
+    "walk": load_animate_image("walk")
+}
 
-    def start_animation(self):
-        self.animation = True
-    def death(self):
-        self.dead = True
-
-    def animate(self, boss):
-        self.boss = boss
-        self.new_phase = self.boss.phase
-        if self.new_phase != self.boss_phase:
-            # Reset animation variables when phase changes
-            self.image_current = 0
-            self.boss_phase = self.new_phase
-            self.images = dict_animation_boss.get(str(self.boss.phase))
-        self.counter += 1
-        if self.counter % 5 == 0 and self.boss.phase < 15:
-            self.image_current += 1
-        if self.counter % 2 == 0 and self.boss.phase == 15:
-            self.image_current += 1
-        if self.counter % 2 == 0 and self.boss.phase == 25:
-            self.image_current += 1
-        if self.counter % 2 == 0 and self.boss.phase == 35:
-            self.image_current += 1
-        if self.counter % 8 == 0 and self.boss.phase == 245:
-            self.image_current += 1
-        if self.counter % 4 == 0 and self.boss.phase == 246:
-            self.image_current += 1
-
-        # Vérification de la fin de l'animation
-        if self.image_current >= len(self.images):
-            if self.boss.phase == 15:
-                self.boss.change_phase = 2
-            if self.boss.phase == 245:
-                self.boss.change_phase = 246
-                self.boss.fake_death_beggining = pg.time.get_ticks()
-            if self.boss.phase == 25:
-                self.boss.change_phase = 3
-            if self.boss.phase == 35:
-                self.boss.change_phase = 3
-            # Revenir à l'image de départ
-            self.image_current = 1
-
-        self.image = self.images[self.image_current]
-        if self.boss.phase == 3 or self.boss.phase == 35:
-            self.image = pg.transform.scale(self.image, (250, 450))
-            self.boss.rect.x = 1000
-            self.boss.rect.y = 250
-        elif self.boss.phase == 25:
-            self.image = pg.transform.scale(self.image, (240/0.7, 450/0.94))
-            self.boss.rect.x = 975
-            self.boss.rect.y = 220
-
-        else:
-            self.image = pg.transform.scale(self.image, (400, 650))
 
 
 def load_animate_image_boss(sprite_name, phase):
@@ -143,6 +117,10 @@ def load_animate_image_boss(sprite_name, phase):
         for num in range(1, 3):
             images_path = path + str(num) + ".png"
             images.append(pg.image.load(images_path))
+    elif phase == '5':
+        for num in range(1, 17):
+            images_path = path + str(num) + ".png"
+            images.append(pg.image.load(images_path))
 
     else:
         for num in range(1, 4):
@@ -154,13 +132,91 @@ dict_animation_boss = {
     "1": load_animate_image_boss('mob', '1'),
     "2": load_animate_image_boss('mob', '2'),
     "3": load_animate_image_boss('mob', '3'),
+    "5": load_animate_image_boss('mob', '5'),
     "15": load_animate_image_boss('mob', '15'),
     "245": load_animate_image_boss('mob', '245'),
     "246": load_animate_image_boss('mob', '246'),
     "25": load_animate_image_boss('mob', '25'),
-    "35": load_animate_image_boss('mob', '35')
+    "35": load_animate_image_boss('mob', '35'),
 }
 
+
+
+class Animatesprite(pg.sprite.Sprite):
+    def __init__(self, sprite_name):
+        super().__init__()
+        self.boss = Boss
+        self.image = pg.image.load(f'Image_du_jeu/{sprite_name}.png')
+        self.image = pg.transform.scale(self.image, (300, 500))
+        self.image_current = 0
+        self.boss_phase = boss_phase
+        self.images = dict_animation_boss.get(str(self.boss_phase))
+        self.animation = False
+        self.dead = False
+        self.counter = 0
+        self.music = sound
+
+
+    def start_animation(self):
+        self.animation = True
+    def death(self):
+        self.dead = True
+
+    def animate(self, boss):
+        self.boss = boss
+        self.new_phase = self.boss.phase
+        if self.new_phase != self.boss_phase:
+            # Reset animation variables when phase changes
+            self.image_current = 0
+            self.boss_phase = self.new_phase
+            self.images = dict_animation_boss.get(str(self.boss.phase))
+        self.counter += 1
+        if self.counter % 5 == 0 and self.boss.phase < 5:
+            self.image_current += 1
+        if self.counter % 8 == 0 and self.boss.phase == 5:
+            self.image_current += 1
+        if self.counter % 2 == 0 and self.boss.phase == 15:
+            self.image_current += 1
+        if self.counter % 2 == 0 and self.boss.phase == 25:
+            self.image_current += 1
+        if self.counter % 2 == 0 and self.boss.phase == 35:
+            self.image_current += 1
+        if self.counter % 8 == 0 and self.boss.phase == 245:
+            self.image_current += 1
+        if self.counter % 4 == 0 and self.boss.phase == 246:
+            self.image_current += 1
+
+        # Vérification de la fin de l'animation
+        if self.image_current >= len(self.images) and not self.boss.animation_end:
+            if self.boss.phase == 15:
+                self.boss.change_phase = 2
+            if self.boss.phase == 245:
+                self.boss.change_phase = 246
+                self.boss.fake_death_beggining = pg.time.get_ticks()
+            if self.boss.phase == 25:
+                self.boss.change_phase = 3
+            if self.boss.phase == 35:
+                self.boss.change_phase = 3
+            if self.boss.phase == 5:
+                self.boss.animation_end = True
+            # Revenir à l'image de départ
+            self.image_current = 1
+
+        if self.boss.animation_end:
+            self.image = pg.image.load(f'Image_du_jeu/mob/phase_5/mob5_16.png')
+        else:
+            self.image = self.images[self.image_current]
+        if self.boss.phase == 3 or self.boss.phase == 35 or self.boss.phase == 5:
+            self.image = pg.transform.scale(self.image, (250, 450))
+            self.boss.rect.x = 1000
+            self.boss.rect.y = 250
+        elif self.boss.phase == 25:
+            self.image = pg.transform.scale(self.image, (240/0.7, 450/0.94))
+            self.boss.rect.x = 975
+            self.boss.rect.y = 220
+
+        else:
+            self.image = pg.transform.scale(self.image, (400, 650))
 
 
 class Animation(pg.sprite.Sprite):
@@ -173,6 +229,7 @@ class Animation(pg.sprite.Sprite):
         self.images = dict_animation.get("walk")
         self.animation = False
         self.dead = False
+        self.counter = 0
 
 
     def start_animation(self):
@@ -188,12 +245,16 @@ class Animation(pg.sprite.Sprite):
                 self.images = dict_animation.get("death")
                 #self.dead = False
                 # Passer à l'image suivante
-                self.image_current += 1
+                self.counter += 1
+                if self.counter % 10:
+                    self.image_current += 1
                 # Vérification de la fin de l'animation
                 if self.image_current >= len(self.images):
                     # Revenir à l'image de départ
                     self.image_current = 24
+                    self.game_over = True
                     self.animation = False
+
                 self.image = self.images[self.image_current]
                 self.image = pg.transform.scale(self.image, (150, 150))
                 if direction == -1:
@@ -220,32 +281,6 @@ class Animation(pg.sprite.Sprite):
             self.image = first
             #go = False
 
-def load_animate_image(sprite_name):
-    # Charger les images
-    images = []
-    if sprite_name == "death":
-        path = f"Image_du_jeu/{sprite_name}/"
-        for num in range(0, 25):
-            images_path = path + str(num) + ".png"
-            images.append(pg.image.load(images_path))
-    elif sprite_name == "walk":
-        path = f"Image_du_jeu/{sprite_name}/"
-        for num in range(0, 7):
-            images_path = path + str(num) + ".png"
-            images.append(pg.image.load(images_path))
-    else:
-        path = f"Image_du_jeu/{sprite_name}_items/run_"
-        for num in range(0, 7):
-            images_path = path + str(num) + ".png"
-            images.append(pg.image.load(images_path))
-    return images
-
-dict_animation = {
-    "hero": load_animate_image("hero"),
-    "death": load_animate_image("death"),
-    "walk": load_animate_image("walk")
-}
-
 # Class du hero
 class Hero(Animation):
     def __init__(self, Game):
@@ -253,7 +288,7 @@ class Hero(Animation):
         self.game = Game
         self.pv = 100
         self.pvmax = 100
-        self.attack = 20
+        self.attack = 100
         self.vitesse_mouve = 10 * fps_factor
         #self.image = pg.transform.scale(self.image, (150, 150))
         self.rect = self.image.get_rect()
@@ -270,9 +305,10 @@ class Hero(Animation):
         self.t1 , self.t2 = 0,0
         self.delta_temps = 0
         self.get_degats = 0
-        keur = trouver_image("keur.png")
         self.image_heart = pg.image.load(keur)
         self.image_heart = pg.transform.scale(self.image_heart, (50,50))
+        self.game_over = False
+        self.music = sound
 
     def nombre_coeurs(self):
         # Admettons que chaque coeur représente 25 points de vie
@@ -318,6 +354,7 @@ class Hero(Animation):
     #   self.rect.y += self.vitesse_mouve
     def Attack(self):
         self.all_attack.add(Attack_hero(self))
+        self.music.attack.play()
 
     def Trajectoire(self):
         self.all_trajectoire.add(Trajectoire_hero(self))
@@ -354,6 +391,8 @@ class Game:
             pg.Rect(00, 450, 150, 40), pg.Rect(400, 450, 150, 40), pg.Rect(600, 250, 150, 40),
             pg.Rect(200, 250, 150, 40)
         ]
+        self.platform_position = [(0, 449), (400, 449), (600, 249), (200, 249)]
+        self.music = sound
 
     def collision(self, sprite, Group):
         return pg.sprite.spritecollide(sprite, Group, False, sprite.collide_mask)
@@ -493,6 +532,7 @@ class Boss(Animatesprite):
         self.cooldown = 2700
         self.active = False
         self.fake_death_beggining = 0
+        self.animation_end = False
 
     def update(self, surface, phase):
         # Affichage de la bar de vie
@@ -542,7 +582,7 @@ class Boss(Animatesprite):
                         self.all_attack_boss.add(Lances_down(self, hero_x, hero_y, i))
 
 
-ice_ball = pg.image.load("Image_du_jeu/ice_ball0.png")
+
 class Attack1_boss(pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y):
         super(Attack1_boss, self).__init__()
@@ -584,7 +624,7 @@ class Attack1_boss(pg.sprite.Sprite):
         if self.rect.x < 0:
             self.remouve()
 
-groundattack = pg.image.load("Image_du_jeu/queue.png")
+
 class GroundAttack(pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y):
         super(GroundAttack, self).__init__()
@@ -629,7 +669,7 @@ class GroundAttack(pg.sprite.Sprite):
             if self.rect.y >= 1000:
                 self.remouve()
 
-stalactite = pg.image.load("Image_du_jeu/stalactite.png")
+
 class Stalactite (pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y):
         super(Stalactite, self).__init__()
@@ -651,7 +691,7 @@ class Stalactite (pg.sprite.Sprite):
         if self.rect.y > 900:
             self.remouve()
 
-lances_down = pg.image.load("Image_du_jeu/spear/spear_final.png")
+
 class Lances_down (pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y, n):
         super(Lances_down, self).__init__()
@@ -681,7 +721,7 @@ class Lances_down (pg.sprite.Sprite):
             if self.rect.y > 900:
                 self.remouve()
 
-lances_side = pg.image.load("Image_du_jeu/spear_side/spear_final.png")
+
 class Lances_side (pg.sprite.Sprite):
     def __init__(self, boss, hero_x, hero_y, n):
         super(Lances_side, self).__init__()

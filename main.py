@@ -18,7 +18,10 @@ background = pg.image.load(background_path)
 background = pg.transform.scale(background,(reso_h,reso_l))
 background = pg.transform.scale(background, (reso_h, reso_l))
 boss = Boss()
-start_cooldown = 2000
+sound = Sound()
+played = True
+beginning_cooldown = 7000
+start_cooldown = 10000
 fake_death_cooldown = 4000
 last_attack_boss = pg.time.get_ticks()
 last_attack_hero = 0
@@ -26,13 +29,26 @@ hero_attack_cooldown = 250
 # Variables permettant au héros d'avoir un peu d'invicibilité après s'être fait toucher
 invicibility_cooldown = 2000
 last_hit_hero = pg.time.get_ticks()
+bg = pg.image.load("Image_du_jeu/background.png")
+bg = pg.transform.scale(bg, (reso_h, reso_l))
+win = pg.image.load("Image_du_jeu/win_screen.png")
+win = pg.transform.scale(win, (reso_h, reso_l))
+game_keys = pg.image.load("Image_du_jeu/game_keys.png")
+game_keys = pg.transform.scale(game_keys, (192*2, 128*2))
+lose = pg.image.load("Image_du_jeu/game_over.png")
+lose = pg.transform.scale(lose, (reso_h, reso_l))
+platformdraw = pg.image.load("Image_du_jeu/plateforme_main.png")
+platformdraw = pg.transform.scale(platformdraw, (150, 41))
+beginning = True
+end = False
 
 
 # Chargement du jeu
 game = Game()
 
-at = trouver_image("hero's_attack.png")
+at = trouver_image("hero_attack.png")
 keur = trouver_image("keur.png")
+
 # Temps entre chaque attaque du hero
 temps_de_pause = 0.1
 
@@ -94,6 +110,7 @@ while running:
 
             # Pression sur la touche (up) pour effectuer un saut
             if event.key == pg.K_UP:
+                sound.up.play()
                 game.hero.jumped = True
                 game.hero.nb_jump += 1
                 if game.hero.rect.y == 0:
@@ -174,15 +191,30 @@ while running:
     # Application de gravite
     game.application_gravite()
 
-    # Affichage de l'arrière-plan
-    screen.blit(background, (0, 0))
-
     # Affichage du sol
     game.ground.afficher_sol(screen)
+
+    # Affichage de l'arrière-plan
+    screen.blit(background, (0, 0))
 
     # Mise à jour de la barre de vie du boss et de sa phase
     game.boss.update(screen, game.boss.phase)
 
+    # Création et affichage du des platformes
+    for rectangle in game.list_platform:
+        platform = Ground_up(rectangle)
+        game.platform_group.add(platform)
+        # Conditions pour marcher sur la plateforme
+        if game.hero.rect.midbottom[1] // 10 * 10 == platform.rect.top and game.hero.rect.colliderect(rectangle):
+            game.resistance = -10
+            game.hero.nb_jump = 0
+
+    for platform in game.platform_group:
+        platform.afficher_platform(screen)
+
+    for i in range(0, 4):
+        position = game.platform_position[i]
+        screen.blit(platformdraw, position)
 
     # Affichage du héros
     screen.blit(game.hero.image, game.hero.rect)
@@ -199,6 +231,10 @@ while running:
     # Affichage des attaques du boss
     game.boss.all_attack_boss.draw(screen)
 
+    if game.hero.pv <= 0 and played:
+        sound.death.play()
+        played = False
+
     # Changements de phases
     if game.boss.change_phase != 0:
         game.boss.phase = game.boss.change_phase
@@ -210,6 +246,10 @@ while running:
 
     if game.boss.pv <= 0 and game.boss.phase == 2:
         game.boss.phase = 245
+
+    if game.boss.pv <= 0 and game.boss.phase == 3:
+        game.boss.phase = 5
+        game.boss.active = False
 
     if time_now - game.boss.fake_death_beggining > fake_death_cooldown and game.boss.phase == 246:
         game.boss.phase = 25
@@ -267,19 +307,6 @@ while running:
 
 
 
-    # Création et affichage du des platformes
-    for rectangle in game.list_platform:
-        platform = Ground_up(rectangle)
-        game.platform_group.add(platform)
-        # Conditions pour marcher sur la plateforme
-        if game.hero.rect.midbottom[1] // 10 * 10 == platform.rect.top and game.hero.rect.colliderect(rectangle):
-            game.resistance = -10
-            game.hero.nb_jump = 0
-
-    for platform in game.platform_group:
-        platform.afficher_platform(screen)
-
-
     # Ensuite, dans votre boucle principale, affichez les cœurs en fonction des PV du héros
     for i in range(game.hero.nombre_coeurs()):
         # Supposons que vous avez une image de cœur chargée et prête à être utilisée
@@ -305,6 +332,27 @@ while running:
     game.hero.health_bar(screen)
     # Animation lorsque le hero marche
     game.hero.update_animation(game.hero.direction)
+
+    if end:
+        print("oui")
+        time.sleep(5)
+        print("nin")
+        running = False
+        print("oarf")
+    if game.boss.animation_end:
+        screen.blit(win, (0, 0))
+        end = True
+    print(game.hero.game_over)
+    if game.hero.game_over:
+        screen.blit(lose, (0, 0))
+        print("work")
+        end = True
+    if time_now - last_attack_boss > beginning_cooldown and beginning:
+        beginning = False
+    if beginning:
+        screen.blit(bg, (0, 0))
+        screen.blit(game_keys, (reso_h-192*2, reso_l-124*2))
+
 
     # gestion des FPS (Framerate Per Second)
     game.clock.tick(game.fps)
