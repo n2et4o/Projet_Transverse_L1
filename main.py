@@ -20,8 +20,8 @@ background = pg.transform.scale(background, (reso_h, reso_l))
 boss = Boss()
 sound = Sound()
 played = True
-beginning_cooldown = 7000
-start_cooldown = 10000
+beginning_cooldown = 1000
+start_cooldown = 4000
 fake_death_cooldown = 4000
 last_attack_boss = pg.time.get_ticks()
 last_attack_hero = 0
@@ -233,6 +233,7 @@ while running:
 
     if game.hero.pv <= 0 and played:
         sound.death.play()
+        print("deathsound")
         played = False
 
     # Changements de phases
@@ -334,18 +335,13 @@ while running:
     game.hero.update_animation(game.hero.direction)
 
     if end:
-        print("oui")
         time.sleep(5)
-        print("nin")
         running = False
-        print("oarf")
     if game.boss.animation_end:
         screen.blit(win, (0, 0))
         end = True
-    print(game.hero.game_over)
     if game.hero.game_over:
         screen.blit(lose, (0, 0))
-        print("work")
         end = True
     if time_now - last_attack_boss > beginning_cooldown and beginning:
         beginning = False

@@ -32,11 +32,13 @@ def trouver_image(nom_image):
 class Sound():
     def __init__(self):
         self.theme = pg.mixer_music.load("Musiques_et_sons/Musique.wav")
-        self.theme_volume = pg.mixer_music.set_volume(0.5)
+        self.theme_volume = pg.mixer_music.set_volume(0.7)
         self.theme = pg.mixer_music.play(-1, fade_ms=40000)
         self.death = pg.mixer.Sound("Musiques_et_sons/death.wav")
         self.attack = pg.mixer.Sound("Musiques_et_sons/boule_de_feu_lancement.wav")
         self.up = pg.mixer.Sound("Musiques_et_sons/pop.wav")
+        self.stalactite = pg.mixer.Sound("Musiques_et_sons/stalactite.wav")
+        self.unsheathed = pg.mixer.Sound("Musiques_et_sons/unsheathed.wav")
 sound = Sound()
 
 run0 = trouver_image("run_0.png")
@@ -552,7 +554,7 @@ class Boss(Animatesprite):
 
     def Attack_boss(self, hero_x, hero_y):
         if self.active:
-            rand_attack = random.randint(1, 2)
+            rand_attack = 6
             if self.phase == 2:
                 rand_attack = random.randint(1, 3)
             if self.phase == 35:
@@ -683,12 +685,14 @@ class Stalactite (pg.sprite.Sprite):
 
 
     def remouve(self):
+        sound.stalactite.set_volume(0.3)
+        sound.stalactite.play()
         self.boss.last_remove = pg.time.get_ticks()
         self.boss.all_attack_boss.remove(self)
 
     def mouv_attack(self,screen):
         self.rect.y += self.vitesse_attack
-        if self.rect.y > 900:
+        if self.rect.y > 800:
             self.remouve()
 
 
@@ -713,6 +717,9 @@ class Lances_down (pg.sprite.Sprite):
 
     def mouv_attack(self,screen):
         if self.state == "waiting":
+            current_time = time.time()
+            sound.unsheathed.set_volume(0.025)
+            sound.unsheathed.play()
             current_time = time.time()
             if current_time - self.last_show_time >= 0.9:
                 self.state = "down"
@@ -744,6 +751,8 @@ class Lances_side (pg.sprite.Sprite):
     def mouv_attack(self,screen):
         if self.state == "waiting":
             current_time = time.time()
+            sound.unsheathed.set_volume(0.025)
+            sound.unsheathed.play()
             if current_time - self.last_show_time >= 0.6:
                 self.state = "side"
         if self.state == "side":
@@ -769,6 +778,8 @@ class Ice_work (pg.sprite.Sprite):
     def remouve(self):
         cross = random.choice([1, 2])
         position = self.rect.y
+        sound.stalactite.set_volume(0.3)
+        sound.stalactite.play()
         self.boss.last_remove = pg.time.get_ticks()
         self.boss.all_attack_boss.remove(self)
         for i in range(0, 4):
