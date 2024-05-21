@@ -554,7 +554,7 @@ class Boss(Animatesprite):
 
     def Attack_boss(self, hero_x, hero_y):
         if self.active:
-            rand_attack = 6
+            rand_attack = random.randint(1, 2)
             if self.phase == 2:
                 rand_attack = random.randint(1, 3)
             if self.phase == 35:

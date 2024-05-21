@@ -20,8 +20,8 @@ background = pg.transform.scale(background, (reso_h, reso_l))
 boss = Boss()
 sound = Sound()
 played = True
-beginning_cooldown = 1000
-start_cooldown = 4000
+beginning_cooldown = 7000
+start_cooldown = 10000
 fake_death_cooldown = 4000
 last_attack_boss = pg.time.get_ticks()
 last_attack_hero = 0
@@ -132,11 +132,12 @@ while running:
                 if game.hero.rect.y == 0:
                     game.hero.jumped = False
 
-            if joystick.get_button(2) and time_now - last_attack_hero > hero_attack_cooldown and start_cooldown == 0:  # Supposons que le bouton 2 soit le bouton "Carré"
+            if joystick.get_button(2) and game.hero.can_attack(temps_de_pause) and time_now - last_attack_hero > hero_attack_cooldown and start_cooldown == 0:  # Supposons que le bouton 2 soit le bouton "Carré"
                 first = game.hero.image
                 game.hero.image = pg.image.load(at)
                 game.hero.image = pg.transform.scale(game.hero.image, (150, 150))
                 game.hero.Attack()
+                last_attack_hero = pg.time.get_ticks()
                 if game.hero.delta_temps >= 2:
                     game.hero.image = first
 
@@ -146,9 +147,10 @@ while running:
                     if game.hero.delta_temps >= 2:
                         game.hero.image = first
 
-            if joystick.get_button(1) and time_now - last_attack_hero > hero_attack_cooldown and start_cooldown == 0:  # Supposons que le bouton 1 soit le bouton "Cercle"
+            if joystick.get_button(1) and game.hero.can_attack(temps_de_pause) and time_now - last_attack_hero > hero_attack_cooldown and start_cooldown == 0:  # Supposons que le bouton 1 soit le bouton "Cercle"
                 nouveau_projectile = Trajectoire_hero(game.hero)
                 game.hero.all_trajectoire.add(nouveau_projectile)
+                last_attack_hero = pg.time.get_ticks()
             # Vers le bas
             if joystick.get_button(12) > 0.1 and game.hero.rect.y <= 500:
                 game.resistance = 0
