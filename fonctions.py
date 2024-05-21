@@ -290,7 +290,7 @@ class Hero(Animation):
         self.game = Game
         self.pv = 100
         self.pvmax = 100
-        self.attack = 100
+        self.attack = 25
         self.vitesse_mouve = 10 * fps_factor
         #self.image = pg.transform.scale(self.image, (150, 150))
         self.rect = self.image.get_rect()
